@@ -5,32 +5,48 @@
 #include <cstdlib>
 #include "Number.h"
 
-enum TokenType{ ID=1, NUM, STR };
+enum TokenType{ ID=1, NUM, STR, BRACKET, OPERATOR };
 
 class Token
 {
 public:
     Token( std::string str ) : strval(strval){}
-    Token( TokenType type, std::string str )
-    {
-        int i;
-        this->type = type;
-        switch(type)
-        {
-        case 1: strval = str;
-                break;
-        case 2: 
-                numobj = Number(str);
-                break;
-        case 3: strval = str;
-                break;
-        default: break;
-        }
+    Token( TokenType type, std::string str ) : type(type), strval(str)
+    {   
+        if ( type == NUM )
+            numobj = Number(str);
     }
+    std::string getStrval() const { return strval; }
+    TokenType   getTokenType() const { return type; }
+    friend std::ostream &operator << ( std::ostream& out, Token tt )
+    {
+        if ( tt.type==ID )
+        {
+            out << "ID: " << tt.strval << std::endl;
+        }
+        else if ( tt.type==NUM )
+        {
+            out << tt.numobj;
+        }
+        else if ( tt.type==STR )
+        {
+            out << "STR: " << tt.strval << std::endl;
+        }
+        else if ( tt.type==BRACKET )
+        {
+            out << "BRACKET: " << tt.strval << std::endl;
+        }
+        else if ( tt.type==OPERATOR )
+        {
+            out << "OPERATOR: " << tt.strval << std::endl;
+        }
+        return out;
+    }
+
 private:
-    Number numobj;
-    std::string strval;
     TokenType type;  
+    std::string strval;
+    Number numobj;
 };
 
 #endif
