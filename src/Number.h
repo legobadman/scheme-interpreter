@@ -22,12 +22,23 @@ public:
         if ( this->type==FLOAT )
             val.f = atof(str.c_str());
         else
-            val.f = atoi(str.c_str());
+            val.i = atoi(str.c_str());
 
     }
     int getInteger()const{ return val.i; }
     float getFloat()const{ return val.f; }
     DataType getType()const{ return type; }
+
+    friend std::ostream &operator << ( std::ostream &out, Number num )
+    {
+        out << "NUM: ";
+        if ( num.type == INT )
+            out << num.val.i << std::endl;
+        else if( num.type == FLOAT )
+            out << num.val.f << std::endl;
+        return out;
+    }
+
 private:
     union{
         float   f;
