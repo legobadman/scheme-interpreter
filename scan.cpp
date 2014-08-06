@@ -35,11 +35,20 @@ void scan( vector<Token> &Q, istream &in )
     // Q now is a token stream.
 }
 
+void outputtest( vector<Token> &Q )
+{
+    for( int i=0; i<Q.size(); i++ )
+    {
+        cout << Q[i] << endl;
+    }
 
-main()
+}
+
+void main2()
 {
     ifstream inFile("f.scm");
     vector<Token> Q;
     scan( Q, cin );
+    outputtest( Q );
     //scan(inFile);
 }
