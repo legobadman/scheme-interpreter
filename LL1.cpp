@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void scan( vector<Token> &Q, istream &in );
+void scanByChar( vector<Token> &Q, istream &in );
 void outputtest( vector<Token> &Q );
 
 vector<Token> TokenStream;
@@ -175,9 +175,73 @@ treenode ArguRefList()
         error("ArguRefList()");
 }
 
+/* DEF -> ( define DEFOBJ DEFBODY )
+ */
+treenode DEF()
+{
+    match("(");    
+    match("define");
+    DEFOBJ();
+    DEFBODY();
+    match(")");
+}
+
+/* DEFOBJ -> ID | ( ID Argulist )
+ */
+treenode DEFOBJ()
+{
+    Token token = TokenStream[currentIndex];
+    if ( token.getTokenType() == ID )
+        match( ID );
+    else if ( token.getStrval() == "(" )
+    {   
+        match("(");
+        match(ID);
+        ArguRefList();
+        match(")");
+    }
+    else
+        error("DEFOBJ()");
+}
+
+
+/* DEFOBJ -> ID | ( ID Argulist )
+ */
+treenode DEFBODY()
+{
+    Token token = TokenStream[currentIndex];
+    if ( token.getStrval() == "(" )
+    {
+        Token next_token = TokenStream[currentIndex+1];
+        if ( next_token.getStrval() == "define" )
+        {
+            DEF();
+            DEFBODY();
+        }
+        else
+        {
+            exp();
+            DEFBODY();
+        }
+    }
+    else if ( token.getStrval()==")" )
+    {
+        return treenode();
+    }
+    else if ( token.getTokenType()==ID )
+    {
+        match(ID);
+    }
+    else
+        error("DEFBODY()");
+
+}
+
+
+
 int main()
 {
-    scan( TokenStream, cin ); 
+    scanByChar( TokenStream, cin ); 
 //    outputtest( TokenStream );
     exp();
 }
