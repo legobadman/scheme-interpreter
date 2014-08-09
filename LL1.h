@@ -15,6 +15,13 @@ treenode procedure();
 
 treenode Operator();
 
+treenode Rop();
+
+treenode IF();
+treenode COND();
+treenode ConditionList();
+treenode LET();
+
 treenode LAMB();
 
 treenode exp_();
