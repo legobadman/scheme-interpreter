@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include "Number.h"
 
-enum TokenType{ ID=1, NUM, STR, BRACKET, OPERATOR };
+enum TokenType{ ID=1, NUM, STR, BRACKET, OPERATOR, ROP };
 
 class Token
 {
@@ -20,25 +20,15 @@ public:
     TokenType   getTokenType() const { return type; }
     friend std::ostream &operator << ( std::ostream& out, Token tt )
     {
-        if ( tt.type==ID )
+        switch(tt.type)
         {
-            out << "ID: " << tt.strval << std::endl;
-        }
-        else if ( tt.type==NUM )
-        {
-            out << tt.numobj;
-        }
-        else if ( tt.type==STR )
-        {
-            out << "STR: " << tt.strval << std::endl;
-        }
-        else if ( tt.type==BRACKET )
-        {
-            out << "BRACKET: " << tt.strval << std::endl;
-        }
-        else if ( tt.type==OPERATOR )
-        {
-            out << "OPERATOR: " << tt.strval << std::endl;
+        case ID:    out << "ID: " << tt.strval << std::endl;break;
+        case NUM:   out << tt.numobj; break;
+        case STR:   out << "STR: " << tt.strval << std::endl; break;
+        case BRACKET:   out << "BRACKET: " << tt.strval << std::endl; break;
+        case OPERATOR:  out << "OPERATOR: " << tt.strval << std::endl; break;
+        case ROP:       out << "ROP: " << tt.strval << std::endl; break;
+        default: out << "error(), what the token is !" << std::endl; break;
         }
         return out;
     }
