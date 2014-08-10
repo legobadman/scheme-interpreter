@@ -64,16 +64,38 @@ treenode exp()
         match("(");
         /* special procedure */
         token = TokenStream[currentIndex];
-        if ( token.getStrval() == "cond" )
+        str = token.getStrval();
+        if ( str == "cond" )
             COND();
-        else if ( token.getStrval() == "if" )
+        else if ( str == "if" )
+        {
             IF();
-        else if ( token.getStrval() == "let" )
+        }
+        else if ( str == "let" )
+        {
             LET();
+        }
+        else if ( str == "cons" )
+        {
+            CONS();
+        }
+        else if ( str == "car" )
+        {
+            CAR();
+        }
+        else if ( str == "cdr" )
+        {
+            CDR();
+        }
+        else if ( str == "list" )
+        {
+            LIST();
+        }
         else
+        {
             procedure();
-
-        exp_();
+            exp_();
+        }
         match(")");
     }
     else if (token.getStrval()=="\"" || 
@@ -113,6 +135,10 @@ treenode procedure()
         Rop();
     else if ( str=="and" || str=="or" || str=="not" )
         Boolop();
+    else if ( str=="car" )
+        CAR();
+    else if ( str=="cdr" )
+        CDR();
     else if ( str=="(" )
     {
         if( TokenStream[currentIndex+1].getStrval() == "lambda" )
@@ -395,6 +421,44 @@ treenode LET()
     match(")");
 
     exp();
+}
+
+static treenode VariableList()
+{
+    Token token = TokenStream[currentIndex];
+    if( token.getStrval() == ")" )
+        return treenode();
+    else
+    {
+        exp();
+        VariableList();
+    }
+}
+
+treenode CONS()
+{
+    match("cons");
+    //left part
+    exp();
+    //right part
+    exp();
+
+}
+treenode CAR()
+{
+    match("car");
+    exp();
+}
+treenode CDR()
+{
+    match("cdr");
+    exp();
+}
+
+treenode LIST()
+{
+    match("list");
+    VariableList();
 }
 
 
