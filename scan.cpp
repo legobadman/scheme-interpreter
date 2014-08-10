@@ -44,13 +44,13 @@ void outputtest( vector<Token> &Q )
 
 }
 
-void scanByChar( vector<Token> &Q, istream &in )
+string getSourceCodeFromStream( istream &in )
 {
     char c;
     /* the num of brack in the program */
     int     leftBracket, rightBracket;
     /* some code appear in the command line mode */
-    string  segmentCode;
+    string  sourceCode;
 
     leftBracket = rightBracket = 0;
     
@@ -60,16 +60,21 @@ void scanByChar( vector<Token> &Q, istream &in )
     {
         leftBracket += (c=='(')? 1 : 0;
         rightBracket += (c==')')? 1 : 0;
-        segmentCode += c;
+        sourceCode += c;
 
         if( leftBracket==rightBracket ) break;
     }
     
+    return sourceCode; 
+}
+
+void getTokenStream( vector<Token> &Q, string sourceCode )
+{
     set_functions_for_allfunctions();
     int startpos = 0;
-    while ( startpos < segmentCode.size() )
+    while ( startpos < sourceCode.size() )
     {
-        char currchar = segmentCode[startpos];
+        char currchar = sourceCode[startpos];
         if ( currchar == ' ' or currchar=='\n' or currchar=='\t' )
         {
             startpos++;
@@ -82,10 +87,13 @@ void scanByChar( vector<Token> &Q, istream &in )
         int MatchLength( const string, int (*)(const char *) );
         const string getpiece( string, int );
         
+        string piece = getpiece( sourceCode, startpos );
+        
         int maxindex = -1, maxValue = 0;
         for( int i=0; i<numOfRegex; i++ )
         {
-            match[i] = MatchLength( getpiece( segmentCode, startpos ), ptr[i] );
+            //cout << piece << endl;
+            match[i] = MatchLength( piece, ptr[i] );
             if ( match[i] > maxValue )
             {
                 maxValue = match[i];
@@ -96,8 +104,8 @@ void scanByChar( vector<Token> &Q, istream &in )
         /* now, we get the matched code: Code[ startpos : startpos+maxValue ] */
         if( maxValue > 0 )
         {
-            const string word = segmentCode.substr( startpos, maxValue );
-            TokenType type = (TokenType)( (*ptr_action[maxindex])( word.c_str() ) );
+            const string word = sourceCode.substr( startpos, maxValue );
+            TokenType type = (TokenType)((*ptr_action[maxindex])( word.c_str() ));
             Q.push_back( Token( type, word.c_str() ) );
         }else{
             cerr << "match Error!" << endl;
@@ -106,7 +114,6 @@ void scanByChar( vector<Token> &Q, istream &in )
         startpos += maxValue;
         
     }
-    
 }
 
 /* str = getpiece(str,startpos): a string can be regard as a sequence of pieces 
@@ -116,7 +123,7 @@ void scanByChar( vector<Token> &Q, istream &in )
 const string getpiece( string s, int startpos )
 {
     int i;
-    for ( i=startpos; (s[i]!=' ')&&(s[i]!='\n')&&(s[i]!='\t'); i++ );
+    for ( i=startpos; i<s.size()&&(s[i]!=' ')&&(s[i]!='\n')&&(s[i]!='\t'); i++ );
 
     return s.substr( startpos, i-startpos );
 }
@@ -133,8 +140,10 @@ int MatchLength( const string piece, int (*p)(const char *) )
 int main2()
 {
     vector<Token> Q;
-    scanByChar( Q, cin );
+    string sourceCode = getSourceCodeFromStream( cin );
+    getTokenStream( Q, sourceCode );
     outputtest( Q );
-    
+
+
     return 0;
 }
