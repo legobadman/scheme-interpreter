@@ -111,6 +111,8 @@ treenode procedure()
         Operator();
     else if ( str=="<" || str=="<=" || str==">" || str==">=" || str=="=" )
         Rop();
+    else if ( str=="and" || str=="or" || str=="not" )
+        Boolop();
     else if ( str=="(" )
     {
         if( TokenStream[currentIndex+1].getStrval() == "lambda" )
@@ -181,6 +183,26 @@ treenode Rop()
     }
 }
 
+treenode Boolop()
+{
+    string str = TokenStream[currentIndex].getStrval();
+    if ( str == "and" )
+    {
+        match("and");
+    }
+    else if ( str == "or" )
+    {
+        match("or");
+    }
+    else if ( str == "not" )
+    {
+        match("not");
+    }
+    else
+    {
+        error("Boolop()");
+    }
+}
 
 treenode LAMB()
 {
@@ -374,6 +396,7 @@ treenode LET()
 
     exp();
 }
+
 
 int main()
 {
