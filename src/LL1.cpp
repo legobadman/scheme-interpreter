@@ -112,7 +112,12 @@ treenode procedure()
     else if ( str=="<" || str=="<=" || str==">" || str==">=" || str=="=" )
         Rop();
     else if ( str=="(" )
-        LAMB();
+    {
+        if( TokenStream[currentIndex+1].getStrval() == "lambda" )
+            LAMB();
+        else
+            exp();
+    }
     else if ( token.getTokenType() ==ID )
     {
         match(ID);
