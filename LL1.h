@@ -37,4 +37,11 @@ treenode DEFOBJ();
 
 treenode DEFBODY();
 
+
+treenode CONS();
+treenode CAR();
+treenode CDR();
+
+treenode LIST();
+
 #endif
