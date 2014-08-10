@@ -7,7 +7,10 @@
 
 using namespace std;
 
-void scanByChar( vector<Token> &Q, istream &in );
+
+string getSourceCodeFromStream( istream &in );
+void getTokenStream( vector<Token> &Q, string sourceCode );
+
 void outputtest( vector<Token> &Q );
 
 vector<Token> TokenStream;
@@ -65,6 +68,8 @@ treenode exp()
             COND();
         else if ( token.getStrval() == "if" )
             IF();
+        else if ( token.getStrval() == "let" )
+            LET();
         else
             procedure();
 
@@ -207,15 +212,34 @@ treenode ConditionList()
     Token token = TokenStream[currentIndex];
     if ( token.getStrval() == ")" )
         return treenode();
-    else
+    else if ( token.getStrval() == "(" )
     {
         match("(");
-        /* predicate */
-        exp();
-        /* expression */
-        exp();
-        match(")");
-        ConditionList();
+        token = TokenStream[currentIndex];
+        if ( token.getStrval() == "(" )
+        {
+            /* predicate */
+            exp();
+            /* expression */
+            exp();
+            match(")");
+            ConditionList();
+        }
+        else if( token.getStrval() == "else" )
+        {
+            match("else");
+            /* expression */
+            exp();
+            match(")");
+        }
+        else
+        {
+            error("错误：cond子句中谓词形式不正确");
+        }
+    }
+    else
+    {
+        error("cond子句形式不正确，应为(p,e)");
     }
 }
 
@@ -314,10 +338,42 @@ treenode COND()
     ConditionList();
 }
 
+treenode LocalVariablePairs()
+{
+    Token token = TokenStream[currentIndex];
+    if ( token.getStrval() == ")" )
+    {
+        return treenode();
+    }
+    else
+    {
+        match("(");
+        //locally defined variable
+        exp();
+        // value to the previous defined variable
+        exp();
+        match(")");
+        LocalVariablePairs();
+    }
+
+}
+
+treenode LET()
+{
+    match("let");
+    match("(");
+
+    LocalVariablePairs();
+
+    match(")");
+
+    exp();
+}
 
 int main()
 {
-    scanByChar( TokenStream, cin ); 
+    string sourceCode = getSourceCodeFromStream( cin ); 
+    getTokenStream( TokenStream, sourceCode );
 //    outputtest( TokenStream );
     exp();
 }
