@@ -10,6 +10,7 @@ enum TokenType{ ID=1, NUM, STR, BRACKET, OPERATOR, ROP };
 class Token
 {
 public:
+    Token()=default;
     Token( std::string str ) : strval(strval){}
     Token( TokenType type, std::string str ) : type(type), strval(str)
     {   
@@ -22,13 +23,13 @@ public:
     {
         switch(tt.type)
         {
-        case ID:    out << "ID: " << tt.strval << std::endl;break;
+        case ID:    out << "ID: " << tt.strval;break;
         case NUM:   out << tt.numobj; break;
-        case STR:   out << "STR: " << tt.strval << std::endl; break;
-        case BRACKET:   out << "BRACKET: " << tt.strval << std::endl; break;
-        case OPERATOR:  out << "OPERATOR: " << tt.strval << std::endl; break;
-        case ROP:       out << "ROP: " << tt.strval << std::endl; break;
-        default: out << "error(), what the token is !" << std::endl; break;
+        case STR:   out << "STR: " << tt.strval; break;
+        case BRACKET:   out << "BRACKET: " << tt.strval; break;
+        case OPERATOR:  out << "OPERATOR: " << tt.strval; break;
+        case ROP:       out << "ROP: " << tt.strval; break;
+        default: out << "error(), what the token is !"; break;
         }
         return out;
     }
