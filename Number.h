@@ -33,9 +33,9 @@ public:
     {
         out << "NUM: ";
         if ( num.type == INT )
-            out << num.val.i << std::endl;
+            out << num.val.i;
         else if( num.type == FLOAT )
-            out << num.val.f << std::endl;
+            out << num.val.f;
         return out;
     }
 
