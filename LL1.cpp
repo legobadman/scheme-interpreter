@@ -54,10 +54,12 @@ void error( string s )
 }
 
 
-treenode exp()
+p_AstNode exp()
 {
     Token token = TokenStream[currentIndex];
     string str = token.getStrval();
+
+    p_AstNode expNode;
 
     if ( token.getStrval() == "(" )
     {
@@ -93,25 +95,31 @@ treenode exp()
         }
         else
         {
-            procedure();
-            exp_();
+            expNode = procedure();
+            vector<p_AstNode> valueList = exp_();
+            expNode->setChild( valueList );
+
         }
         match(")");
     }
     else if (token.getStrval()=="\"" || 
             token.getTokenType()==NUM || token.getTokenType()==ID )
     {
-        Value();
+        expNode = Value();
     }
     else
     {
         error("exp()");
     }
+    return expNode;
 }
 
-treenode Value()
+p_AstNode Value()
 {
     Token token = TokenStream[currentIndex];
+
+    p_AstNode vnode = new ASTNode(token);
+
     if ( token.getStrval() == "\"" )
         match("\"");
     else if ( token.getTokenType() == ID )
@@ -121,42 +129,58 @@ treenode Value()
     else 
         error("Value()");
 
+    return vnode;
+
 }
 
-treenode procedure()
+p_AstNode procedure()
 {
     Token token = TokenStream[currentIndex];
 
     string str = token.getStrval();
 
+    p_AstNode   procNode;
+
     if ( str=="+" || str=="-" || str=="*" || str=="/" )
-        Operator();
+        procNode = Operator();
+
     else if ( str=="<" || str=="<=" || str==">" || str==">=" || str=="=" )
-        Rop();
+        procNode = Rop();
+
     else if ( str=="and" || str=="or" || str=="not" )
-        Boolop();
+        procNode = Boolop();
+
     else if ( str=="car" )
-        CAR();
+        procNode = CAR();
+
     else if ( str=="cdr" )
-        CDR();
+        procNode = CDR();
+
     else if ( str=="(" )
     {
         if( TokenStream[currentIndex+1].getStrval() == "lambda" )
-            LAMB();
+            procNode = LAMB();
         else
-            exp();
+            procNode = exp();
     }
+
     else if ( token.getTokenType() ==ID )
     {
         match(ID);
     }
+
     else
         error("procedure()");
+
+    return procNode;
 }
 
-treenode Operator()
+p_AstNode Operator()
 {
-    string str = TokenStream[currentIndex].getStrval();
+    Token   token = TokenStream[currentIndex];
+    string str = token.getStrval();
+    p_AstNode newnode = new ASTNode( token );
+
     if ( str == "+" )
     {
         match("+");
@@ -177,12 +201,16 @@ treenode Operator()
     {
         error("Operator()");
     }
+    return newnode;
 
 }
 
-treenode Rop()
+p_AstNode Rop()
 {
+    Token   token = TokenStream[currentIndex];
     string str = TokenStream[currentIndex].getStrval();
+    
+    p_AstNode newnode = new ASTNode( token );
     if ( str == "<" )
     {
         match("<");
@@ -207,11 +235,14 @@ treenode Rop()
     {
         error("ROP()");
     }
+    return newnode;
 }
 
-treenode Boolop()
+p_AstNode Boolop()
 {
+    Token   token = TokenStream[currentIndex];
     string str = TokenStream[currentIndex].getStrval();
+    p_AstNode newnode = new ASTNode( token );
     if ( str == "and" )
     {
         match("and");
@@ -228,9 +259,10 @@ treenode Boolop()
     {
         error("Boolop()");
     }
+    return newnode;
 }
 
-treenode LAMB()
+p_AstNode LAMB()
 {
     match( "(" );
     match( "lambda" );
@@ -242,29 +274,34 @@ treenode LAMB()
 
 }
 
-treenode exp_()
+/* 返回引用还是值返回? */
+vector<p_AstNode> exp_()
 {
     Token token = TokenStream[currentIndex];
+
+    vector<p_AstNode> valueList;
 
     if ( token.getStrval()=="(" || token.getStrval()=="\"" || 
             token.getTokenType()==ID || token.getTokenType()==NUM )
     {
-        exp();
-        exp_();
+        p_AstNode newnode = exp();
+        valueList = exp_();
+        valueList.push_back( newnode );
     }
     else if ( token.getStrval()==")" )
-        return treenode();
+        return valueList;
     else
         error("exp_()");
 
+    return valueList;
 }
 
 /* the function try to match (<p1> <e1>) (<p2> <e2>) ... */
-treenode ConditionList()
+p_AstNode ConditionList()
 {
     Token token = TokenStream[currentIndex];
     if ( token.getStrval() == ")" )
-        return treenode();
+        return p_AstNode();
     else if ( token.getStrval() == "(" )
     {
         match("(");
@@ -296,7 +333,7 @@ treenode ConditionList()
     }
 }
 
-treenode ArguRefList()
+p_AstNode ArguRefList()
 {
     Token token = TokenStream[currentIndex];
     if ( token.getTokenType() == ID )
@@ -306,7 +343,7 @@ treenode ArguRefList()
     }
     else if ( token.getStrval() == ")" )
     {
-        return treenode();
+        return p_AstNode();
     }
     else
         error("ArguRefList()");
@@ -314,7 +351,7 @@ treenode ArguRefList()
 
 /* DEF -> ( define DEFOBJ DEFBODY )
  */
-treenode DEF()
+p_AstNode DEF()
 {
     match("(");    
     match("define");
@@ -325,7 +362,7 @@ treenode DEF()
 
 /* DEFOBJ -> ID | ( ID Argulist )
  */
-treenode DEFOBJ()
+p_AstNode DEFOBJ()
 {
     Token token = TokenStream[currentIndex];
     if ( token.getTokenType() == ID )
@@ -344,7 +381,7 @@ treenode DEFOBJ()
 
 /* DEFOBJ -> ID | ( ID Argulist )
  */
-treenode DEFBODY()
+p_AstNode DEFBODY()
 {
     Token token = TokenStream[currentIndex];
     if ( token.getStrval() == "(" )
@@ -363,7 +400,7 @@ treenode DEFBODY()
     }
     else if ( token.getStrval()==")" )
     {
-        return treenode();
+        return p_AstNode();
     }
     else if ( token.getTokenType()==ID )
     {
@@ -374,7 +411,7 @@ treenode DEFBODY()
 
 }
 
-treenode IF()
+p_AstNode IF()
 {
     /* the '(' before if has been matched in exp() */
     match("if");
@@ -385,18 +422,18 @@ treenode IF()
     exp();
 }
 
-treenode COND()
+p_AstNode COND()
 {
     match("cond");
     ConditionList();
 }
 
-treenode LocalVariablePairs()
+p_AstNode LocalVariablePairs()
 {
     Token token = TokenStream[currentIndex];
     if ( token.getStrval() == ")" )
     {
-        return treenode();
+        return p_AstNode();
     }
     else
     {
@@ -411,7 +448,7 @@ treenode LocalVariablePairs()
 
 }
 
-treenode LET()
+p_AstNode LET()
 {
     match("let");
     match("(");
@@ -423,11 +460,11 @@ treenode LET()
     exp();
 }
 
-static treenode VariableList()
+static p_AstNode VariableList()
 {
     Token token = TokenStream[currentIndex];
     if( token.getStrval() == ")" )
-        return treenode();
+        return p_AstNode();
     else
     {
         exp();
@@ -435,7 +472,7 @@ static treenode VariableList()
     }
 }
 
-treenode CONS()
+p_AstNode CONS()
 {
     match("cons");
     //left part
@@ -444,18 +481,20 @@ treenode CONS()
     exp();
 
 }
-treenode CAR()
+
+p_AstNode CAR()
 {
     match("car");
     exp();
 }
-treenode CDR()
+
+p_AstNode CDR()
 {
     match("cdr");
     exp();
 }
 
-treenode LIST()
+p_AstNode LIST()
 {
     match("list");
     VariableList();
