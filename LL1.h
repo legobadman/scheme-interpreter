@@ -4,44 +4,44 @@
 #include "Tree.h"
 
 
-treenode Lisp();
+p_AstNode Lisp();
 
-treenode exp();
-
-
-treenode Value();
-
-treenode procedure();
-
-treenode Operator();
-
-treenode Rop();
-treenode Boolop();
-
-treenode IF();
-treenode COND();
-treenode ConditionList();
-
-treenode LET();
-
-treenode LAMB();
-
-treenode exp_();
-
-treenode ArguRefList();
+p_AstNode exp();
 
 
-treenode DEF();
+p_AstNode Value();
 
-treenode DEFOBJ();
+p_AstNode procedure();
 
-treenode DEFBODY();
+p_AstNode Operator();
+
+p_AstNode Rop();
+p_AstNode Boolop();
+
+p_AstNode IF();
+p_AstNode COND();
+p_AstNode ConditionList();
+
+p_AstNode LET();
+
+p_AstNode LAMB();
+
+std::vector<p_AstNode> exp_();
+
+p_AstNode ArguRefList();
 
 
-treenode CONS();
-treenode CAR();
-treenode CDR();
+p_AstNode DEF();
 
-treenode LIST();
+p_AstNode DEFOBJ();
+
+p_AstNode DEFBODY();
+
+
+p_AstNode CONS();
+p_AstNode CAR();
+p_AstNode CDR();
+
+p_AstNode LIST();
 
 #endif
