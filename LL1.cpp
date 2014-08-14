@@ -10,8 +10,9 @@ using namespace std;
 
 string getSourceCodeFromStream( istream &in );
 void getTokenStream( vector<Token> &Q, string sourceCode );
-
 void outputtest( vector<Token> &Q );
+
+p_AstNode CalculateAST( p_AstNode );
 
 vector<Token> TokenStream;
 int currentIndex = 0;
@@ -22,7 +23,7 @@ void match( TokenType type )
     if ( token.getTokenType() == type )
     {
         currentIndex++;
-        cout << "match " << token.getStrval() << endl;
+//        cout << "match " << token.getStrval() << endl;
     }
     else
     {
@@ -38,7 +39,7 @@ void match( string s )
     if ( token.getStrval() == s )
     {
         currentIndex++;
-        cout << "match " << token.getStrval() << endl;
+//        cout << "match " << token.getStrval() << endl;
     }
     else
     {
@@ -95,10 +96,18 @@ p_AstNode exp()
         }
         else
         {
-            expNode = procedure();
+            p_AstNode procNode = procedure();
             vector<p_AstNode> valueList = exp_();
-            expNode->setChild( valueList );
+            procNode -> setChild( valueList );
 
+            /* execute the calculation in the ast
+             * and return a single astnode with the
+             * final value 
+             */
+    
+            expNode = CalculateAST( procNode );
+
+            delete procNode;
         }
         match(")");
     }
@@ -286,7 +295,7 @@ vector<p_AstNode> exp_()
     {
         p_AstNode newnode = exp();
         valueList = exp_();
-        valueList.push_back( newnode );
+        valueList.insert( valueList.begin(), newnode );
     }
     else if ( token.getStrval()==")" )
         return valueList;
@@ -505,6 +514,7 @@ int main()
 {
     string sourceCode = getSourceCodeFromStream( cin ); 
     getTokenStream( TokenStream, sourceCode );
-//    outputtest( TokenStream );
-    exp();
+    p_AstNode result = exp();
+
+    cout << result << endl;
 }
