@@ -17,6 +17,11 @@ public:
         if ( type == NUM )
             numobj = Number(str);
     }
+
+    Token( Number num ) : type(NUM), numobj(num) {}
+    Token( int integer ) : type(NUM), strval("NUM"), numobj(integer) {}
+    Token( float f ) : type(NUM), strval("NUM"), numobj(f) {}
+
     std::string getStrval() const { return strval; }
     TokenType   getTokenType() const { return type; }
     friend std::ostream &operator << ( std::ostream& out, Token tt )
@@ -32,6 +37,11 @@ public:
         default: out << "error(), what the token is !"; break;
         }
         return out;
+    }
+
+    Number &getNumber()
+    {
+        return numobj;
     }
 
 private:
