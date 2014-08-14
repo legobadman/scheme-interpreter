@@ -25,6 +25,17 @@ public:
             val.i = atoi(str.c_str());
 
     }
+    Number( int i ) 
+    {
+        val.i = i;    
+        type = INT;
+    }
+    Number( float f )
+    {
+        val.f = f;
+        type = FLOAT;
+    }
+
     int getInteger()const{ return val.i; }
     float getFloat()const{ return val.f; }
     DataType getType()const{ return type; }
@@ -37,6 +48,76 @@ public:
         else if( num.type == FLOAT )
             out << num.val.f;
         return out;
+    }
+
+    
+    Number operator + (const Number &numobj)
+    {
+        if( this->type==FLOAT )
+        {
+            if( numobj.type == FLOAT )
+                return Number( (float)(val.f + numobj.val.f) );
+            else
+                return Number( (float)(val.f + numobj.val.i) );
+        }
+        else
+        {
+            if( numobj.type == FLOAT )
+                return Number( (float)(val.i + numobj.val.f) );
+            else
+                return Number( (int)(val.i + numobj.val.i) );
+        }
+    }
+    Number operator - (const Number &numobj)
+    {
+        if( this->type==FLOAT )
+        {
+            if( numobj.type == FLOAT )
+                return Number( (float)(val.f - numobj.val.f) );
+            else
+                return Number( (float)(val.f - numobj.val.i) );
+        }
+        else
+        {
+            if( numobj.type == FLOAT )
+                return Number( (float)(val.i - numobj.val.f) );
+            else
+                return Number( (int)(val.i - numobj.val.i) );
+        }
+    }
+    Number operator * (const Number &numobj)
+    {
+        if( this->type==FLOAT )
+        {
+            if( numobj.type == FLOAT )
+                return Number( (float)(val.f * numobj.val.f) );
+            else
+                return Number( (float)(val.f * numobj.val.i) );
+        }
+        else
+        {
+            if( numobj.type == FLOAT )
+                return Number( (float)(val.i * numobj.val.f) );
+            else
+                return Number( (int)(val.i * numobj.val.i) );
+        }
+    }
+    Number operator / (const Number &numobj)
+    {
+        if( this->type==FLOAT )
+        {
+            if( numobj.type == FLOAT )
+                return Number( (float)(val.f / numobj.val.f) );
+            else
+                return Number( (float)(val.f / numobj.val.i) );
+        }
+        else
+        {
+            if( numobj.type == FLOAT )
+                return Number( (float)(val.i / numobj.val.f) );
+            else
+                return Number( (int)(val.i / numobj.val.i) );
+        }
     }
 
 private:
