@@ -14,6 +14,13 @@ public:
         numer=0;
         denom=1;
     }
+
+    Fraction(const Fraction& f)
+    {
+        numer = f.numer;
+        denom = f.denom;
+    }
+
     Fraction(int x)
     {
         numer=x;
@@ -25,24 +32,22 @@ public:
         numer = n;
         denom = d;
     } 
-    Fraction operator + ( Fraction& );
-    Fraction operator + ( int );
+    Fraction operator + ( const Fraction& )const;
+    Fraction operator + ( int )const;
 
-    Fraction operator * ( Fraction& );
-    Fraction operator * ( int );
+    Fraction operator * ( const Fraction& )const;
+    Fraction operator * ( int )const;
 
-    Fraction operator / ( Fraction& );
-    Fraction operator / ( int );
+    Fraction operator / ( const Fraction& )const;
+    Fraction operator / ( int )const;
 
-    Fraction operator - ( Fraction& );
-    Fraction operator - ( int );
+    Fraction operator - ( const Fraction& )const;
+    Fraction operator - ( int )const;
 
     int numer;
     int denom;
 };
 
-
-Fraction operator+ (int a, Fraction f);
 
 ostream &operator << ( ostream&, Fraction& ); 
 
