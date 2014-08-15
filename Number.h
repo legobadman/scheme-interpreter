@@ -17,6 +17,7 @@ public:
     Number( std::string str );
     Number( int i ); 
     Number( float f );
+    Number( int numer, int denom );
 
     int getInteger()const{ return i; }
     float getFloat()const{ return f; }
