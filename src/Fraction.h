@@ -15,11 +15,7 @@ public:
         denom=1;
     }
 
-    Fraction(const Fraction& f)
-    {
-        numer = f.numer;
-        denom = f.denom;
-    }
+    Fraction(const Fraction& f);
 
     Fraction(int x)
     {
@@ -27,11 +23,8 @@ public:
         denom=1;
     }
 
-    Fraction(int n,int d)
-    {
-        numer = n;
-        denom = d;
-    } 
+    Fraction(int n,int d);
+
     Fraction operator + ( const Fraction& )const;
     Fraction operator + ( int )const;
 
