@@ -18,6 +18,7 @@ public:
     Number( int i ); 
     Number( float f );
     Number( int numer, int denom );
+    Number( Fraction ff );
 
     int getInteger()const{ return i; }
     float getFloat()const{ return f; }

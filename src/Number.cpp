@@ -44,14 +44,34 @@ Number::Number( int ii ) : i(ii), type(INT)
 {
 }
 
-Number::Number( float ff ) : f(ff), type(FLOAT)
-{
+Number::Number( float ff ) : f(ff), type(FLOAT) {}
 
+Number::Number( int numer, int denom)
+{
+    if( numer%denom==0 )
+    {
+        type = INT;
+        i = numer % denom;
+    }
+    else
+    {
+        type = FRACTION;
+        ff = Fraction(numer, denom);
+    }
 }
 
-Number::Number( int numer, int denom ) : ff( numer,denom )
+Number::Number( Fraction f )
 {
-    type = FRACTION;
+    if( f.numer % f.denom == 0 )
+    {
+        type = INT;
+        i = f.numer % f.denom;
+    }
+    else
+    {
+        type = FRACTION;
+        ff = Fraction( f );
+    }
 }
 
 std::ostream &operator << ( std::ostream &out, Number num )
@@ -127,7 +147,7 @@ Number Number::operator - (const Number &numobj)
         case FLOAT:
             return Number( i-numobj.f );
         case FRACTION:
-            sum = numobj.ff - i;
+            sum = i - numobj.ff;
             return Number( sum.numer, sum.denom );
         }
         break;
