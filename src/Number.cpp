@@ -4,7 +4,8 @@
 Number::Number( std::string str )
 {
     int i;
-    int numer_pos, demon_pos;
+    int numer_pos, denom_pos;
+    int isPositive;
     
     this->type = INT;
 
@@ -18,7 +19,7 @@ Number::Number( std::string str )
         {
             numer_pos = i;
             type = FRACTION;
-            demon_pos = str.size();
+            denom_pos = str.size();
         }
     }
     if ( type==FLOAT )
@@ -28,9 +29,9 @@ Number::Number( std::string str )
     else if( type==FRACTION )
     {
         int numer = atoi(str.substr(0,numer_pos).c_str());
-        int demon = atoi(str.substr(numer_pos+1,demon_pos).c_str());
+        int denom = atoi(str.substr(numer_pos+1,denom_pos).c_str());
         
-        this->ff = Fraction( numer, demon );
+        this->ff = Fraction( numer, denom );
         this->type=FRACTION;
     }
     else
@@ -48,10 +49,10 @@ Number::Number( float ff ) : f(ff), type(FLOAT) {}
 
 Number::Number( int numer, int denom)
 {
-    if( numer%denom==0 )
+    if( numer % denom==0 )
     {
         type = INT;
-        i = numer % denom;
+        i = numer / denom;
     }
     else
     {
