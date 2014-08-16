@@ -13,7 +13,7 @@ public:
     Token()=default;
     Token( std::string str ) : strval(strval){}
     Token( TokenType type, std::string str ) : type(type), strval(str)
-    {   
+    {
         if ( type == NUM )
             numobj = Number(str);
     }

@@ -30,6 +30,9 @@ public:
     Number operator * (const Number& );
     Number operator / (const Number& );
     
+    Number operator = (int a){ i=a; type=INT; }
+    Number operator = (float b){ f=b; type=FLOAT; }
+
     bool operator < (const Number& );
     bool operator <= (const Number& );
     bool operator > (const Number& );
