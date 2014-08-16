@@ -1,8 +1,7 @@
-#! -*- coding:utf8 -*-
-
+#! /usr/bin/python
+# -*- coding:utf8 -*-
 
 # 'grammer'
-
 '''
 Lisp -> exp | DEF (需要人工干预以消除二义性)
     
@@ -21,7 +20,6 @@ Lisp -> exp | DEF (需要人工干预以消除二义性)
     ArguRefList -> ID Argulist | None
     ArguCallList -> exp ArguCallList | None
     
-
 '''
 
 
@@ -162,7 +160,6 @@ def DEF():
     DEFOBJ()
     DEFBODY()
     match(')')
-
 
 def DEFOBJ():
     global currentTokenIndex
