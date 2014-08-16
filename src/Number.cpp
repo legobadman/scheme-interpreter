@@ -1,31 +1,57 @@
 #include "Number.h"
+#include <cstdlib>
 
 Number::Number( std::string str )
 {
     int i;
+    int numer_pos, demon_pos;
     
     this->type = INT;
+
     for( i=0; i<str.size(); i++ )
+    {
         if ( str[i]=='.' )
-            this->type = FLOAT;
- 
-    if ( this->type==FLOAT )
+        {
+            type = FLOAT;
+        }
+        else if( str[i]=='/' )
+        {
+            numer_pos = i;
+            type = FRACTION;
+            demon_pos = str.size();
+        }
+    }
+    if ( type==FLOAT )
+    {
         f = atof(str.c_str());
+    }
+    else if( type==FRACTION )
+    {
+        int numer = atoi(str.substr(0,numer_pos).c_str());
+        int demon = atoi(str.substr(numer_pos+1,demon_pos).c_str());
+        
+        this->ff = Fraction( numer, demon );
+        this->type=FRACTION;
+    }
     else
+    {
         this->i = atoi(str.c_str());
+        this->type=INT;
+    }
+}
+
+Number::Number( int ii ) : i(ii), type(INT)
+{
+}
+
+Number::Number( float ff ) : f(ff), type(FLOAT)
+{
 
 }
 
-Number::Number( int i ) 
+Number::Number( int numer, int denom ) : ff( numer,denom )
 {
-    i = i;    
-    type = INT;
-}
-
-Number::Number( float f )
-{
-    f = f;
-    type = FLOAT;
+    type = FRACTION;
 }
 
 std::ostream &operator << ( std::ostream &out, Number num )
@@ -35,32 +61,203 @@ std::ostream &operator << ( std::ostream &out, Number num )
         out << num.i;
     else if( num.type == FLOAT )
         out << num.f;
+    else
+        out << num.ff;
     return out;
 }
 
-Number Number::operator + (const Number &numobj)
+Number Number::operator+ (const Number &numobj)
 {
-    return Number( ((type==INT)? i : f) +
-                    ((numobj.type==INT)? numobj.i : numobj.f));
+    Fraction sum;
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return Number( i+numobj.i );
+        case FLOAT:
+            return Number( i+numobj.f );
+        case FRACTION:
+            sum = numobj.ff + i;
+            return Number( sum.numer, sum.denom );
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return Number( f+numobj.i );
+        case FLOAT:
+            return Number( f+numobj.f );
+        case FRACTION:
+            cerr << "error sum between float type and fraction type" << endl;
+            exit(0);
+        }
+        break;
+    case FRACTION:
+        switch(numobj.type)
+        {
+        case INT:
+            sum = ff + numobj.i;
+            return Number( sum.numer, sum.denom );
+        case FLOAT:
+            cerr << "error sum between float type and fraction type" << endl;
+            exit(0);
+        case FRACTION:
+            sum = ff + numobj.ff;
+            return Number( sum.numer, sum.denom );
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 Number Number::operator - (const Number &numobj)
 {
-    return Number( ((type==INT)? i : f) -
-                    ((numobj.type==INT)? numobj.i : numobj.f));
+    Fraction sum;
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return Number( i-numobj.i );
+        case FLOAT:
+            return Number( i-numobj.f );
+        case FRACTION:
+            sum = numobj.ff - i;
+            return Number( sum.numer, sum.denom );
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return Number( f-numobj.i );
+        case FLOAT:
+            return Number( f-numobj.f );
+        case FRACTION:
+            cerr << "error sum between float type and fraction type" << endl;
+            exit(0);
+        }
+        break;
+    case FRACTION:
+        switch(numobj.type)
+        {
+        case INT:
+            sum = ff - numobj.i;
+            return Number( sum.numer, sum.denom );
+        case FLOAT:
+            cerr << "error sum between float type and fraction type" << endl;
+            exit(0);
+        case FRACTION:
+            sum = ff - numobj.ff;
+            return Number( sum.numer, sum.denom );
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 Number Number::operator * (const Number &numobj)
 {
-    return Number( ((type==INT)? i : f) *
-                    ((numobj.type==INT)? numobj.i : numobj.f));
+    Fraction sum;
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return Number( i*numobj.i );
+        case FLOAT:
+            return Number( i*numobj.f );
+        case FRACTION:
+            sum = numobj.ff * i;
+            return Number( sum.numer, sum.denom );
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return Number( f*numobj.i );
+        case FLOAT:
+            return Number( f*numobj.f );
+        case FRACTION:
+            cerr << "error sum between float type and fraction type" << endl;
+            exit(0);
+        }
+        break;
+    case FRACTION:
+        switch(numobj.type)
+        {
+        case INT:
+            sum = ff * numobj.i;
+            return Number( sum.numer, sum.denom );
+        case FLOAT:
+            cerr << "error sum between float type and fraction type" << endl;
+            exit(0);
+        case FRACTION:
+            sum = ff * numobj.ff;
+            return Number( sum.numer, sum.denom );
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 Number Number::operator / (const Number &numobj)
 {
-    return Number( ((type==INT)? i : f) /
-                    ((numobj.type==INT)? numobj.i : numobj.f));
+    Fraction sum;
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return Number( i+numobj.i );
+        case FLOAT:
+            return Number( i+numobj.f );
+        case FRACTION:
+            sum = numobj.ff / i;
+            return Number( sum.numer, sum.denom );
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return Number( f / numobj.i );
+        case FLOAT:
+            return Number( f / numobj.f );
+        case FRACTION:
+            cerr << "error sum between float type and fraction type" << endl;
+            exit(0);
+        }
+        break;
+    case FRACTION:
+        switch(numobj.type)
+        {
+        case INT:
+            sum = ff / numobj.i;
+            return Number( sum.numer, sum.denom );
+        case FLOAT:
+            cerr << "error sum between float type and fraction type" << endl;
+            exit(0);
+        case FRACTION:
+            sum = ff / numobj.ff;
+            return Number( sum.numer, sum.denom );
+        }
+        break;
+    default:
+        break;
+    }
 }
+
 
 bool Number::operator < (const Number &numobj)
 {
@@ -88,6 +285,3 @@ bool Number::operator == (const Number &numobj)
 {
     return ((type==INT)? i : f) == ((numobj.type==INT)? numobj.i : numobj.f);
 }
-
-
-
