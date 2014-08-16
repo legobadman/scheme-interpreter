@@ -43,7 +43,7 @@ Fraction Fraction::operator / (int a) const
 
 ostream &operator << ( ostream &out, Fraction &f )
 {
-    out << f.numer << "/" << f.denom << endl;
+    out << f.numer << "/" << f.denom;
     return out;
 }
 
