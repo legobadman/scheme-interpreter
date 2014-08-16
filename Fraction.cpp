@@ -93,3 +93,23 @@ ostream &operator << ( ostream &out, Fraction &f )
 }
 
 
+
+Fraction operator+ (int a, const Fraction &f)
+{
+    return Fraction( a*f.denom + f.numer, f.denom ); 
+}
+
+Fraction operator* (int a, const Fraction &f)
+{
+    return Fraction( a*f.numer, f.denom );
+}
+
+Fraction operator- (int a, const Fraction &f)
+{
+    return Fraction( a*f.denom-f.numer, f.denom );
+}
+
+Fraction operator/ (int a, const Fraction &f)
+{
+    return Fraction( a * f.denom, f.numer ); 
+}
