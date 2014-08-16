@@ -13,25 +13,25 @@ p_AstNode CalculateAST( p_AstNode ast_root )
     Token token = ast_root->getToken();
     TokenType type = token.getTokenType();
     
-    std::string op = token.getStrval();
+    std::string proc = token.getStrval();
 
-    p_AstNode   resultNode, leftValue, rightValue;
+    p_AstNode   resultNode;
     Number      x(0), numobj;
 
     if( type== OPERATOR )
     {
-        if( op=="+" )
+        if( proc=="+" )
         {   
-            x = 0;
             std::vector<p_AstNode> child = ast_root->getChild();
-            for( int i=0; i<child.size(); i++ )
+            x = child[0]->getToken().getNumber();
+            for( int i=1; i<child.size(); i++ )
             {
                 numobj = child[i]->getToken().getNumber();
                 x = x + numobj;
             }
 
         }
-        else if( op=="-" )
+        else if( proc=="-" )
         {
             std::vector<p_AstNode> child = ast_root->getChild();
             x = child[0]->getToken().getNumber();
@@ -42,7 +42,7 @@ p_AstNode CalculateAST( p_AstNode ast_root )
             }
 
         }
-        else if( op=="*" )
+        else if( proc=="*" )
         {
             std::vector<p_AstNode> child = ast_root->getChild();
             x = 1;
@@ -53,10 +53,11 @@ p_AstNode CalculateAST( p_AstNode ast_root )
             }
 
         }
-        else if( op=="/" )
+        else if( proc=="/" )
         {   
             std::vector<p_AstNode> child = ast_root->getChild();
-            for( int i=0; i<child.size(); i++ )
+            x = child[0]->getToken().getNumber();
+            for( int i=1; i<child.size(); i++ )
             {
                 numobj = child[i]->getToken().getNumber();
                 x = x / numobj;
@@ -68,35 +69,63 @@ p_AstNode CalculateAST( p_AstNode ast_root )
     
     else if( type==ROP )
     {
-        leftValue = ast_root->getChild()[0];
-        rightValue = ast_root->getChild()[1];
-        bool x;
-        if( op=="<" )
-        {
+        int leftValue = ast_root->getChild()[0]->getToken().getNumber().getInteger();
+        int rightValue = ast_root->getChild()[1]->getToken().getNumber().getInteger();
+        
+        int boolvalue;
+        //  Do not set the boolean type, which means
+        //  the "true" can be represented by 1. 
+        if( proc=="<" )
+            boolvalue = (leftValue < rightValue);
+
+        else if( proc=="<=" )
+            boolvalue = (leftValue <= rightValue);
+
+        else if( proc=="=" )
+            boolvalue = (leftValue == rightValue);
+
+        else if( proc==">" )
+            boolvalue = (leftValue > rightValue);
             
-        }
-        else if( op=="<=" )
-        {
+        else if( proc==">=" )
+            boolvalue = (leftValue >= rightValue);
 
-        }
-        else if( op=="=" )
-        {
+        resultNode = new ASTNode( Token(boolvalue) );
 
-        }
-        else if( op==">" )
-        {
-
-        }
-        else if( op==">=" )
-        {
-
-        }
     }        
 
     else if( type==ID )
     {
+        int boolvalue;
+        if( proc=="and" )
+        {   
+            std::vector<p_AstNode> child = ast_root->getChild();
+            boolvalue = 1;
+            for( int i=0; i<child.size(); i++ )
+            {
+                int bvalue = child[i]->getToken().getNumber().getInteger();
+                boolvalue = boolvalue && bvalue;
+            }
+        }
+        else if( proc=="or" )
+        {
+            std::vector<p_AstNode> child = ast_root->getChild();
+            boolvalue = 0;
+            for( int i=0; i<child.size(); i++ )
+            {
+                int bvalue = child[i]->getToken().getNumber().getInteger();
+                boolvalue = boolvalue || bvalue;
+            }
 
+        }
+        else if( proc=="not" )
+        {
+            std::vector<p_AstNode> child = ast_root->getChild();
+            boolvalue = !child[0]->getToken().getNumber().getInteger(); 
+            
+        }
 
+        resultNode = new ASTNode( Token(boolvalue) );
     }
 
     return resultNode;
