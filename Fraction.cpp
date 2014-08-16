@@ -28,7 +28,7 @@ Fraction Fraction::operator * (int a)const
 
 Fraction Fraction::operator * (const Fraction &f)const
 {
-    return Fraction( numer*f.denom, denom*f.denom );
+    return Fraction( numer*f.numer, denom*f.denom );
 }
 
 Fraction Fraction::operator / (const Fraction &f)const
