@@ -15,12 +15,11 @@ p_AstNode CalculateAST( p_AstNode ast_root )
     
     std::string op = token.getStrval();
 
-    p_AstNode   resultNode;
-    Number      x, numobj;
+    p_AstNode   resultNode, leftValue, rightValue;
+    Number      x(0), numobj;
 
-    switch(type)
+    if( type== OPERATOR )
     {
-    case OPERATOR:
         if( op=="+" )
         {   
             x = 0;
@@ -65,16 +64,39 @@ p_AstNode CalculateAST( p_AstNode ast_root )
 
         }
         resultNode = new ASTNode( Token(x) );
-        break;
+    }
+    
+    else if( type==ROP )
+    {
+        leftValue = ast_root->getChild()[0];
+        rightValue = ast_root->getChild()[1];
+        bool x;
+        if( op=="<" )
+        {
+            
+        }
+        else if( op=="<=" )
+        {
 
-    case ROP:
-        break;
+        }
+        else if( op=="=" )
+        {
 
-    case ID:
-        break;
+        }
+        else if( op==">" )
+        {
 
-    default:
-        break;
+        }
+        else if( op==">=" )
+        {
+
+        }
+    }        
+
+    else if( type==ID )
+    {
+
+
     }
 
     return resultNode;
