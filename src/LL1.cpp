@@ -23,7 +23,7 @@ void match( TokenType type )
     if ( token.getTokenType() == type )
     {
         currentIndex++;
-//        cout << "match " << token.getStrval() << endl;
+        cout << "match " << token.getStrval() << endl;
     }
     else
     {
@@ -39,7 +39,7 @@ void match( string s )
     if ( token.getStrval() == s )
     {
         currentIndex++;
-//        cout << "match " << token.getStrval() << endl;
+        cout << "match " << token.getStrval() << endl;
     }
     else
     {
