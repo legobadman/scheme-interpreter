@@ -240,9 +240,9 @@ Number Number::operator / (const Number &numobj)
         switch(numobj.type)
         {
         case INT:
-            return Number( i+numobj.i );
+            return Number( i, numobj.i );
         case FLOAT:
-            return Number( i+numobj.f );
+            return Number( i/numobj.f );
         case FRACTION:
             sum = numobj.ff / i;
             return Number( sum.numer, sum.denom );
