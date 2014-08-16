@@ -41,6 +41,10 @@ public:
     int denom;
 };
 
+Fraction operator+ (int,const Fraction&);
+Fraction operator* (int,const Fraction&);
+Fraction operator- (int,const Fraction&);
+Fraction operator/ (int,const Fraction&);
 
 ostream &operator << ( ostream&, Fraction& ); 
 
