@@ -1,6 +1,8 @@
 #ifndef _PROCEDURE_H_
 #define _PROCEDURE_H_
 
+#include "Tree.h"
+
 
 p_AstNode add( vector<p_AstNode> &dataSeq );
 
