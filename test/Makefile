@@ -6,7 +6,8 @@ test_Number_obj=\
 
 alltest:
 
-test_fraction.o:
+test_fraction.o: ../Fraction.h test_fraction.cpp
+	g++ -c ../Fraction.h test_fraction.cpp
 
 Fraction.o: ../Fraction.h ../Fraction.cpp
 	g++ -c ../Fraction.h ../Fraction.cpp
