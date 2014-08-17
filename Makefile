@@ -4,7 +4,7 @@ objects=\
 
 main: $(objects)
 	g++ -g $(objects) -o main
-	rm $(objects)
+	#rm $(objects)
 
 LL1.o: LL1.h LL1.cpp Tree.h Token.h
 	g++ -g -c LL1.h LL1.cpp Tree.h Token.h
