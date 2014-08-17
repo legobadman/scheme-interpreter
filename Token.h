@@ -4,8 +4,8 @@
 #include <iostream>
 #include <cstdlib>
 #include "Number.h"
+#include "tokenType.h"
 
-enum TokenType{ ID=1, NUM, STR, BRACKET, OPERATOR, ROP };
 
 class Token
 {
@@ -24,6 +24,7 @@ public:
 
     std::string getStrval() const { return strval; }
     TokenType   getTokenType() const { return type; }
+
     friend std::ostream &operator << ( std::ostream& out, Token tt )
     {
         switch(tt.type)
@@ -32,8 +33,8 @@ public:
         case NUM:   out << tt.numobj; break;
         case STR:   out << "STR: " << tt.strval; break;
         case BRACKET:   out << "BRACKET: " << tt.strval; break;
-        case OPERATOR:  out << "OPERATOR: " << tt.strval; break;
-        case ROP:       out << "ROP: " << tt.strval; break;
+        case ARITH_OP:  out << "ARITH_OP: " << tt.strval; break;
+        case BOOL_OP:       out << "BOOL_OP: " << tt.strval; break;
         default: out << "error(), what the token is !"; break;
         }
         return out;
