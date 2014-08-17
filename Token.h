@@ -10,7 +10,7 @@ enum TokenType{ ID=1, NUM, STR, BRACKET, OPERATOR, ROP };
 class Token
 {
 public:
-    Token()=default;
+    Token(){}
     Token( std::string str ) : strval(strval){}
     Token( TokenType type, std::string str ) : type(type), strval(str)
     {
