@@ -72,7 +72,7 @@ p_AstNode exp()
             COND();
         else if ( str == "if" )
         {
-            IF();
+            expNode = IF();
         }
         else if ( str == "let" )
         {
@@ -423,12 +423,20 @@ p_AstNode DEFBODY()
 p_AstNode IF()
 {
     /* the '(' before if has been matched in exp() */
+    p_AstNode boolean, then_result, else_result;
+
     match("if");
-    exp();
-    // then-part
-    exp();
-    // else-part
-    exp();
+    // judgement
+    boolean = exp();
+        // then-part
+    then_result = exp();
+        // else-part
+    else_result = exp();
+
+    if( boolean->getToken().getNumber() == 1 )
+        return then_result;
+    else
+        return else_result;
 }
 
 p_AstNode COND()
