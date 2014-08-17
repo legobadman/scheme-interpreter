@@ -80,15 +80,15 @@ p_AstNode exp()
         }
         else if ( str == "cons" )
         {
-            CONS();
+            expNode = CONS();
         }
         else if ( str == "car" )
         {
-            CAR();
+            expNode = CAR();
         }
         else if ( str == "cdr" )
         {
-            CDR();
+            expNode = CDR();
         }
         else if ( str == "list" )
         {
@@ -158,12 +158,6 @@ p_AstNode procedure()
 
     else if ( str=="and" || str=="or" || str=="not" )
         procNode = Boolop();
-
-    else if ( str=="car" )
-        procNode = CAR();
-
-    else if ( str=="cdr" )
-        procNode = CDR();
 
     else if ( str=="(" )
     {
@@ -507,23 +501,58 @@ static p_AstNode VariableList()
 p_AstNode CONS()
 {
     match("cons");
-    //left part
-    exp();
-    //right part
-    exp();
 
+    p_AstNode consTypeNode = new ASTNode();
+    //left part
+    p_AstNode leftNode = exp();
+    //right part
+    p_AstNode rightNode = exp();
+
+    vector<p_AstNode> child;
+    child.push_back( leftNode );
+    child.push_back( rightNode );
+    
+    consTypeNode->setChild( child );
+    consTypeNode->setNodeType( CONS_NODE );
+
+    return consTypeNode;
 }
 
 p_AstNode CAR()
 {
     match("car");
-    exp();
+    p_AstNode consNode = exp();
+    // check whether it has only two childNode
+    vector<p_AstNode> Q = consNode->getChild();
+    if( Q.size() != 2 )
+    {
+        cerr << "car操作针对错误的类型。" << endl;
+        exit(0);
+    }
+    else
+    {
+        // get the first element in the cons
+        return Q[0];
+    }
 }
 
 p_AstNode CDR()
 {
     match("cdr");
-    exp();
+    p_AstNode consNode = exp();
+    // check whether it has only two childNode
+    vector<p_AstNode> Q = consNode->getChild();
+    if( Q.size() != 2 )
+    {
+        cerr << "car操作针对错误的类型。" << endl;
+        exit(0);
+    }
+    else
+    {
+        // get the first element in the cons
+        return Q[1];
+    }
+
 }
 
 p_AstNode LIST()
