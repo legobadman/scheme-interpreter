@@ -92,7 +92,7 @@ p_AstNode exp()
         }
         else if ( str == "list" )
         {
-            LIST();
+            expNode = LIST();
         }
         else
         {
@@ -486,16 +486,25 @@ p_AstNode LET()
     exp();
 }
 
-static p_AstNode VariableList()
+static vector<p_AstNode> VariableList()
 {
     Token token = TokenStream[currentIndex];
+    vector<p_AstNode> valueList;
+
     if( token.getStrval() == ")" )
-        return p_AstNode();
+    {
+        // empty list
+        return valueList;
+    }
     else
     {
-        exp();
-        VariableList();
+        p_AstNode newnode = exp();
+        valueList = VariableList();
+        // keep the order
+        valueList.insert( valueList.begin(), newnode );
     }
+
+    return valueList;
 }
 
 p_AstNode CONS()
@@ -524,7 +533,9 @@ p_AstNode CAR()
     p_AstNode consNode = exp();
     // check whether it has only two childNode
     vector<p_AstNode> Q = consNode->getChild();
-    if( Q.size() != 2 )
+
+    if( consNode->getNodeType() != LIST_NODE && 
+        consNode->getNodeType() != CONS_NODE )
     {
         cerr << "car操作针对错误的类型。" << endl;
         exit(0);
@@ -558,7 +569,13 @@ p_AstNode CDR()
 p_AstNode LIST()
 {
     match("list");
-    VariableList();
+    
+    p_AstNode listTypeNode = new ASTNode();
+    listTypeNode -> setNodeType( LIST_NODE );
+
+    listTypeNode -> setChild( VariableList() );
+
+    return listTypeNode;
 }
 
 
