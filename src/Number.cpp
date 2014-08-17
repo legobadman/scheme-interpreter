@@ -77,7 +77,6 @@ Number::Number( Fraction f )
 
 std::ostream &operator << ( std::ostream &out, Number num )
 {
-    out << "NUM: ";
     if ( num.type == INT )
         out << num.i;
     else if( num.type == FLOAT )
