@@ -1,22 +1,37 @@
 #ifndef _TREE_H_
 #define _TREE_H_
 
-#include "Token.h"
 #include <vector>
+#include <iostream>
+#include "Number.h"
+#include "tokenType.h"
+
+using namespace std;
 
 typedef class ASTNode *p_AstNode;
 
+
 extern p_AstNode CalculateAST( p_AstNode ast_root );
 
-enum NodeType{ BOOLEAN_NODE, NUM_NODE, PROC_NODE, CONS_NODE, LIST_NODE };
 
 class ASTNode{
 public:
     ASTNode(){}
-    ASTNode(const ASTNode& node){
+    ASTNode(const ASTNode& node)
+    {
 
     }
-    ASTNode( Token t ) : token(t){}
+    ASTNode( const string &s ) : name(s) {}
+    ASTNode( TokenType type, const string &s ) : nodeType(type), name(s)
+    {
+        if( type == NUM )
+        {
+            number = Number(s);        
+        }
+    }
+    ASTNode( Number n ) : number(n), nodeType( NUM )
+    {
+    }
 
     ~ASTNode()
     {
@@ -28,60 +43,72 @@ public:
     {
         child.push_back( p );
     }
-
-
-    Token &getToken()
+    
+    string getName()
     {
-        return token;
+        return name;
     }
 
-    std::vector<p_AstNode> &getChild()
+    vector<p_AstNode> &getChild()
     {
         return child;
     }
 
-    void setChild(std::vector<p_AstNode> Q)
+    Number &getNumber()
+    {
+        return number;
+    }
+
+    void setChild(vector<p_AstNode> Q)
     {
         child = Q;
     }
 
-    void setNodeType(NodeType t)
+    void setTokenType(TokenType t)
     {
-        type = t;
+        nodeType = t;
     }
-    NodeType getNodeType()const{
-        return type;
+
+    TokenType getTokenType()const
+    {
+        return nodeType;
     }
-    
 
     friend std::ostream &operator<< ( std::ostream &out, p_AstNode pt)
     {
-        switch(pt->type)
+        switch(pt->nodeType)
         {
-        case CONS_NODE: 
-            out << "(" << pt->child[0]->getToken().getNumber()
-                << " . " << pt->child[1]->getToken().getNumber()
+        case CONS: 
+            out << "(" << pt->child[0]->getNumber()
+                << " . " << pt->child[1]->getNumber()
                 << ")";
             break;
-        case LIST_NODE:
+
+        case LIST:
             out << "(";
             for( int i=0; i<pt->child.size(); i++ )
-                out << pt->child[i]->getToken().getNumber() <<" ";
+                out << pt->child[i]->getNumber() <<" ";
             out << ")" << endl;
             break;
+
         default:
-            out << pt->getToken().getNumber();
+            out << pt->getNumber();
             break;
         }
         return out;
     }
 
 private:
-    Token token;
 
-    NodeType type;
+    Number number;
+
+    TokenType nodeType;
 
     std::vector<p_AstNode> child;
+
+    /* the name for procedure or number */
+    /* e.g.  "+" "square" "1" ... */
+    string name;
 };
 
 
