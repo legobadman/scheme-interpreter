@@ -4,44 +4,44 @@
 #include "Tree.h"
 
 
-p_AstNode Lisp();
+p_AstNode LL1_Lisp();
 
-p_AstNode exp();
-
-
-p_AstNode Value();
-
-p_AstNode procedure();
-
-p_AstNode Operator();
-
-p_AstNode Rop();
-p_AstNode Boolop();
-
-p_AstNode IF();
-p_AstNode COND();
-p_AstNode ConditionList();
-
-p_AstNode LET();
-
-p_AstNode LAMB();
-
-std::vector<p_AstNode> exp_();
-
-p_AstNode ArguRefList();
+p_AstNode LL1_exp();
 
 
-p_AstNode DEF();
+p_AstNode LL1_Value();
 
-p_AstNode DEFOBJ();
+p_AstNode LL1_procedure();
 
-p_AstNode DEFBODY();
+p_AstNode LL1_Operator();
+
+p_AstNode LL1_Rop();
+p_AstNode LL1_Boolop();
+
+p_AstNode LL1_IF();
+p_AstNode LL1_COND();
+p_AstNode LL1_ConditionList();
+
+p_AstNode LL1_LET();
+
+p_AstNode LL1_LAMB();
+
+std::vector<p_AstNode> LL1_exp_();
+
+p_AstNode LL1_ArguRefList();
 
 
-p_AstNode CONS();
-p_AstNode CAR();
-p_AstNode CDR();
+p_AstNode LL1_DEF();
 
-p_AstNode LIST();
+p_AstNode LL1_DEFOBJ();
+
+p_AstNode LL1_DEFBODY();
+
+
+p_AstNode LL1_CONS();
+p_AstNode LL1_CAR();
+std::vector<p_AstNode> LL1_CDR();
+
+p_AstNode LL1_LIST();
 
 #endif
