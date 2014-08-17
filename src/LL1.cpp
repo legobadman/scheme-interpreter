@@ -69,7 +69,7 @@ p_AstNode exp()
         token = TokenStream[currentIndex];
         str = token.getStrval();
         if ( str == "cond" )
-            COND();
+            expNode = COND();
         else if ( str == "if" )
         {
             expNode = IF();
@@ -309,8 +309,13 @@ vector<p_AstNode> exp_()
 p_AstNode ConditionList()
 {
     Token token = TokenStream[currentIndex];
+
+    p_AstNode finalResult;
+
     if ( token.getStrval() == ")" )
+    {
         return p_AstNode();
+    }
     else if ( token.getStrval() == "(" )
     {
         match("(");
@@ -318,17 +323,26 @@ p_AstNode ConditionList()
         if ( token.getStrval() == "(" )
         {
             /* predicate */
-            exp();
+            p_AstNode boolvalue = exp();
             /* expression */
-            exp();
+            p_AstNode curr_result = exp();
             match(")");
-            ConditionList();
+            p_AstNode next_result = ConditionList();
+
+            if( boolvalue->getToken().getNumber() == 1 )
+            {
+                finalResult = curr_result;
+            }
+            else
+            {
+                finalResult = next_result;
+            }
         }
         else if( token.getStrval() == "else" )
         {
             match("else");
             /* expression */
-            exp();
+            finalResult = exp();
             match(")");
         }
         else
@@ -340,6 +354,7 @@ p_AstNode ConditionList()
     {
         error("cond子句形式不正确，应为(p,e)");
     }
+    return finalResult;
 }
 
 p_AstNode ArguRefList()
@@ -442,7 +457,7 @@ p_AstNode IF()
 p_AstNode COND()
 {
     match("cond");
-    ConditionList();
+    return ConditionList();
 }
 
 p_AstNode LocalVariablePairs()
