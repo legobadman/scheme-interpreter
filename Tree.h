@@ -29,21 +29,6 @@ public:
         child.push_back( p );
     }
 
-    friend std::ostream &operator<< ( std::ostream &out, p_AstNode pt)
-    {
-        switch(pt->type)
-        {
-        case CONS_NODE: 
-            out << "(" << pt->child[0]->getToken().getNumber()
-                << " . " << pt->child[1]->getToken().getNumber()
-                << ")";
-            break;
-        default:
-            out << pt->getToken().getNumber();
-            break;
-        }
-        return out;
-    }
 
     Token &getToken()
     {
@@ -63,6 +48,32 @@ public:
     void setNodeType(NodeType t)
     {
         type = t;
+    }
+    NodeType getNodeType()const{
+        return type;
+    }
+    
+
+    friend std::ostream &operator<< ( std::ostream &out, p_AstNode pt)
+    {
+        switch(pt->type)
+        {
+        case CONS_NODE: 
+            out << "(" << pt->child[0]->getToken().getNumber()
+                << " . " << pt->child[1]->getToken().getNumber()
+                << ")";
+            break;
+        case LIST_NODE:
+            out << "(";
+            for( int i=0; i<pt->child.size(); i++ )
+                out << pt->child[i]->getToken().getNumber() <<" ";
+            out << ")" << endl;
+            break;
+        default:
+            out << pt->getToken().getNumber();
+            break;
+        }
+        return out;
     }
 
 private:
