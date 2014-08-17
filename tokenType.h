@@ -1,8 +1,10 @@
+#ifndef _TOKEN_TYPE_
+#define _TOKEN_TYPE_
 
 enum TokenType
 {
-    unknown
-    ID = 1,
+    unknown,
+    ID,
     NUM,
     STR,        /* string type e.g "Lisp */
     BRACKET,    /* ( ) */
@@ -14,11 +16,17 @@ enum TokenType
      */
 
     PROC,       /* user_defined procedure */
+    CONS,       /* cons */
     LIST,       /* list type */
     DEFINE,     /* define */
     IF,
     COND,
+    CAR,
+    CDR,
     MAP,
     FILTER
 
 };
+
+
+#endif
