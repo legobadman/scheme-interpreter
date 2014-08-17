@@ -1,4 +1,5 @@
 #include "Tree.h"
+#include "tokenType.h"
 #include "LL1.h"
 #include "Token.h"
 #include "Number.h"
@@ -10,23 +11,24 @@ p_AstNode CalculateAST( p_AstNode ast_root )
 {
     //all the children of ast_root is a single value
 
-    Token token = ast_root->getToken();
-    TokenType type = token.getTokenType();
     
-    std::string proc = token.getStrval();
+    std::string proc = ast_root -> getName();
 
     p_AstNode   resultNode;
     Number      x(0), numobj;
 
-    if( type== OPERATOR )
+    TokenType type = ast_root->getTokenType();
+    
+
+    if( type == ARITH_OP )
     {
         if( proc=="+" )
         {   
             std::vector<p_AstNode> child = ast_root->getChild();
-            x = child[0]->getToken().getNumber();
+            x = child[0]->getNumber();
             for( int i=1; i<child.size(); i++ )
             {
-                numobj = child[i]->getToken().getNumber();
+                numobj = child[i]->getNumber();
                 x = x + numobj;
             }
 
@@ -34,10 +36,10 @@ p_AstNode CalculateAST( p_AstNode ast_root )
         else if( proc=="-" )
         {
             std::vector<p_AstNode> child = ast_root->getChild();
-            x = child[0]->getToken().getNumber();
+            x = child[0] -> getNumber();
             for( int i=1; i<child.size(); i++ )
             {
-                numobj = child[i]->getToken().getNumber();
+                numobj = child[i]->getNumber();
                 x = x - numobj;
             }
 
@@ -48,7 +50,7 @@ p_AstNode CalculateAST( p_AstNode ast_root )
             x = 1;
             for( int i=0; i<child.size(); i++ )
             {
-                numobj = child[i]->getToken().getNumber();
+                numobj = child[i] -> getNumber();
                 x = x * numobj;
             }
 
@@ -56,21 +58,21 @@ p_AstNode CalculateAST( p_AstNode ast_root )
         else if( proc=="/" )
         {   
             std::vector<p_AstNode> child = ast_root->getChild();
-            x = child[0]->getToken().getNumber();
+            x = child[0]->getNumber();
             for( int i=1; i<child.size(); i++ )
             {
-                numobj = child[i]->getToken().getNumber();
+                numobj = child[i]->getNumber();
                 x = x / numobj;
             }
 
         }
-        resultNode = new ASTNode( Token(x) );
+        resultNode = new ASTNode( x );
     }
     
-    else if( type==ROP )
+    else if( type == BOOL_OP )
     {
-        int leftValue = ast_root->getChild()[0]->getToken().getNumber().getInteger();
-        int rightValue = ast_root->getChild()[1]->getToken().getNumber().getInteger();
+        Number leftValue = ast_root->getChild()[0]->getNumber();
+        Number rightValue = ast_root->getChild()[1]->getNumber();
         
         int boolvalue;
         //  Do not set the boolean type, which means
@@ -90,43 +92,10 @@ p_AstNode CalculateAST( p_AstNode ast_root )
         else if( proc==">=" )
             boolvalue = (leftValue >= rightValue);
 
-        resultNode = new ASTNode( Token(boolvalue) );
+        resultNode = new ASTNode( Number(boolvalue) );
 
     }        
 
-    else if( type==ID )
-    {
-        int boolvalue;
-        if( proc=="and" )
-        {   
-            std::vector<p_AstNode> child = ast_root->getChild();
-            boolvalue = 1;
-            for( int i=0; i<child.size(); i++ )
-            {
-                int bvalue = child[i]->getToken().getNumber().getInteger();
-                boolvalue = boolvalue && bvalue;
-            }
-        }
-        else if( proc=="or" )
-        {
-            std::vector<p_AstNode> child = ast_root->getChild();
-            boolvalue = 0;
-            for( int i=0; i<child.size(); i++ )
-            {
-                int bvalue = child[i]->getToken().getNumber().getInteger();
-                boolvalue = boolvalue || bvalue;
-            }
-
-        }
-        else if( proc=="not" )
-        {
-            std::vector<p_AstNode> child = ast_root->getChild();
-            boolvalue = !child[0]->getToken().getNumber().getInteger(); 
-            
-        }
-
-        resultNode = new ASTNode( Token(boolvalue) );
-    }
 
     return resultNode;
 }

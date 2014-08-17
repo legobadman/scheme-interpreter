@@ -14,6 +14,13 @@ public:
             prisoner = new LispEnvironment();
         return *prisoner;
     }
+    void TurnOnCalculation(){
+        is_directly_calculating = 1;
+    }
+    int  isAllowdCalculating()
+    {
+        return is_directly_calculating;
+    }
 private:
     static LispEnvironment *prisoner;
     LispEnvironment(){}
