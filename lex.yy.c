@@ -1,7 +1,7 @@
  
 #include <stdio.h>
 #include <stdlib.h>
-#include "Token.h"
+#include "tokenType.h"
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
@@ -149,16 +149,16 @@ int RecognizeAndAct_for_Operator( const char* text )
 {
     if( Recognize_for_Operator(text) == 1 )
     {
-         return OPERATOR; 
+         return ARITH_OP; 
         return 1;
     }
     return 0;
 }
 
-static int FinalStatus_Rop[]=
+static int FinalStatus_boolop[]=
 {0, 1, 1, 1, 1, 1 }; 
 
-static int T_Rop[][128]=
+static int T_boolop[][128]=
 {
 		{ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 2, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -168,7 +168,7 @@ static int T_Rop[][128]=
 { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-int Recognize_for_Rop( const char * text)
+int Recognize_for_boolop( const char * text)
 {
     int match_length, has_matched, t;            
     const char *p;                      
@@ -179,23 +179,23 @@ int Recognize_for_Rop( const char * text)
     has_matched = 0;
     while( (*p)!='\0' )
     {
-        t = T_Rop[t][*p];
+        t = T_boolop[t][*p];
         if( t == -1 )
         {
             return -1;
         }
         p++;
     }                            
-    if( FinalStatus_Rop[t]==true )             
+    if( FinalStatus_boolop[t]==true )             
         return 1;             
     return -1;                
 }                                
 
-int RecognizeAndAct_for_Rop( const char* text )
+int RecognizeAndAct_for_boolop( const char* text )
 {
-    if( Recognize_for_Rop(text) == 1 )
+    if( Recognize_for_boolop(text) == 1 )
     {
-         return ROP; 
+         return BOOL_OP; 
         return 1;
     }
     return 0;
@@ -333,8 +333,8 @@ void set_functions_for_allfunctions( )
     ptr_action[1] = RecognizeAndAct_for_NUM;
     ptr[2] = Recognize_for_Operator;
     ptr_action[2] = RecognizeAndAct_for_Operator;
-    ptr[3] = Recognize_for_Rop;
-    ptr_action[3] = RecognizeAndAct_for_Rop;
+    ptr[3] = Recognize_for_boolop;
+    ptr_action[3] = RecognizeAndAct_for_boolop;
     ptr[4] = Recognize_for_bracket;
     ptr_action[4] = RecognizeAndAct_for_bracket;
     ptr[5] = Recognize_for_digit;
@@ -342,4 +342,3 @@ void set_functions_for_allfunctions( )
     ptr[6] = Recognize_for_str;
     ptr_action[6] = RecognizeAndAct_for_str;
 }
-
