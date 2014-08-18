@@ -28,7 +28,7 @@ p_AstNode LL1_LAMB();
 
 std::vector<p_AstNode> LL1_exp_();
 
-p_AstNode LL1_ArguRefList();
+std::vector<p_AstNode> LL1_ArguRefList();
 
 
 p_AstNode LL1_DEF();
