@@ -10,7 +10,6 @@ void SymbolTable::insertID( string idName, p_AstNode node )
 
 p_AstNode SymbolTable::getSymbol( string idName )
 {
- 
     map<std::string, p_AstNode>::iterator it;
     it = T.find( idName );
 
@@ -22,4 +21,16 @@ p_AstNode SymbolTable::getSymbol( string idName )
     {
         return NULL;
     }
+}
+
+void SymbolTable::outputTable()
+{
+    map<std::string,p_AstNode>::iterator it;
+    
+    for(it = T.begin(); it != T.end(); it++ )
+    {
+        p_AstNode p = it->second;
+        cout << p << endl;
+    }
+
 }
