@@ -4,7 +4,7 @@
 enum TokenType
 {
     unknown,
-    ID,
+    ID,         /* exclude argument */
     NUM,
     STR,        /* string type e.g "Lisp */
     BRACKET,    /* ( ) */
@@ -19,12 +19,13 @@ enum TokenType
     CONS,       /* cons */
     LIST,       /* list type */
     DEFINE,     /* define */
+    ARGUMENT,   /* special type of "ID"  */
     IF,
     COND,
     CAR,
     CDR,
     MAP,
-    FILTER
+    FILTER,
 
 };
 
