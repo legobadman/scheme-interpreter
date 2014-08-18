@@ -168,7 +168,7 @@ p_AstNode LL1_Value()
     else if ( token.getTokenType() == ID )
     {
         match( ID );
-        vnode = env.SearchSymbol( token.getStrval() );
+        vnode = env.getSymbol( token.getStrval() );
         
         if( !vnode )
         {
@@ -457,7 +457,6 @@ p_AstNode LL1_DEF()
 
     match(")");
 
-    map<string,p_AstNode> HT = env.getSymbolTable();
 
     return defineNode;
 }
@@ -469,6 +468,9 @@ p_AstNode LL1_DEFOBJ()
     Token token = TokenStream[currentIndex];
     
     p_AstNode defobj;
+
+    LispEnvironment env = LispEnvironment::getRunTimeEnv();
+
     /* define symbol */
     if ( token.getTokenType() == ID )
     {
@@ -479,12 +481,22 @@ p_AstNode LL1_DEFOBJ()
     else if ( token.getStrval() == "(" )
     {
         match( "(" );
-        match( ID );
+        
         token = TokenStream[ currentIndex ];
+        
+        match( ID );
+        
         /* Using enum PROC for the user-defined procedure */
         defobj = new ASTNode( PROC, token.getStrval() );
 
-        LL1_ArguRefList();
+        vector<p_AstNode> arguList;
+        arguList = LL1_ArguRefList();
+
+        /* push the argument into the runtime stack */
+        env.pushArgumentInStack( arguList );         
+
+        //env.testStack();
+
         match( ")" );
     }
     else
@@ -547,11 +559,12 @@ p_AstNode LL1_DEFBODY()
     }
     else if ( token.getTokenType() == ID )
     {
+        string s = token.getStrval();
         match(ID);
         
-        string s = token.getStrval();
-        
-        defbody = env.SearchSymbol( s );
+
+
+        defbody = env.getSymbol( s );
 
         /* defbody and the existed Node share a common pointer
          */
@@ -744,9 +757,7 @@ int main()
             cout << result << endl;
         }
 
-        LispEnvironment env = LispEnvironment::getRunTimeEnv();
 
     }
         
 }
-
