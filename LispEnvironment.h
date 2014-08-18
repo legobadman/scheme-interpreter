@@ -39,15 +39,16 @@ public:
 
     void InsertID( string idName, p_AstNode defNode );
 
-    map<string,p_AstNode> getCurrentSymbolTable()
-    {
-
-    }
+    void outputCurrentSymbolTable();
 
     void getAddress()
     {
         cout << prisoner << endl;
     }
+
+    void runTimeStackPush();
+
+    void runTimeStackPop();
 
     p_AstNode ReadOut( p_AstNode );
 
