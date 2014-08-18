@@ -96,6 +96,14 @@ public:
                 out << pt->child[i]->getNumber() <<" ";
             out << ")" << endl;
             break;
+        
+        case NUM:
+            out << pt->name << " : " << pt->number;
+            break;
+
+        case ARGUMENT:
+            out << pt->name << " : " << "ARGUMENT";
+            break;
 
         default:
             out << pt->getNumber();
