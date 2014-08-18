@@ -14,6 +14,8 @@ public:
 
 
     p_AstNode getSymbol( string idName );
+    
+    void outputTable();
 
 private:
     map<std::string,p_AstNode> T;
