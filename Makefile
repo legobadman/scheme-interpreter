@@ -1,6 +1,7 @@
 objects=\
 	LL1.o Number.o scan.o AST.o Fraction.o\
-	lex.yy.o procedure.o LispEnvironment.o
+	lex.yy.o procedure.o LispEnvironment.o\
+	SymbolTable.o
 
 main: $(objects)
 	g++ -g $(objects) -o main
@@ -27,5 +28,8 @@ lex.yy.o: Token.h lex.yy.c
 procedure.o: procedure.cpp procedure.h Tree.h LL1.h LispEnvironment.h
 	g++ -g -c procedure.cpp procedure.h Tree.h LL1.h LispEnvironment.h
     
-LispEnvironment.o: LispEnvironment.cpp LispEnvironment.h
-	g++ -g -c LispEnvironment.h LispEnvironment.cpp
+LispEnvironment.o: SymbolTable.h LispEnvironment.cpp LispEnvironment.h
+	g++ -g -c SymbolTable.h LispEnvironment.h LispEnvironment.cpp
+
+SymbolTable.o: SymbolTable.h SymbolTable.cpp Tree.h
+	g++ -g -c SymbolTable.h SymbolTable.cpp Tree.h
