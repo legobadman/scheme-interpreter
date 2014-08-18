@@ -6,8 +6,8 @@ main: $(objects)
 	g++ -g $(objects) -o main
 	#rm $(objects)
 
-LL1.o: LL1.h LL1.cpp Tree.h Token.h tokenType.h
-	g++ -g -c LL1.h LL1.cpp Tree.h Token.h tokenType.h
+LL1.o: LL1.h LL1.cpp Tree.h Token.h tokenType.h LispEnvironment.h
+	g++ -g -c LL1.h LL1.cpp Tree.h Token.h tokenType.h LispEnvironment.h
 
 Number.o: Number.h Number.cpp
 	g++ -g -c Number.h Number.cpp
