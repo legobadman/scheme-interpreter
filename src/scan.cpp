@@ -54,9 +54,20 @@ string getSourceCodeFromStream( istream &in )
 
     leftBracket = rightBracket = 0;
     
+    cout << endl;
+    cout << ">>>  ";
+    while( c = cin.get() )
+    {
+        if( c!='\n' && c!=' ' && c!='\t' )
+            break;
+        if( c=='\n' )
+            cout << ">>>  ";
+
+    }
+    cin.putback(c);
     //cout << ">>> ";
 
-    while( c = getchar() )
+    while( c = cin.get() )
     {
         leftBracket += (c=='(')? 1 : 0;
         rightBracket += (c==')')? 1 : 0;
@@ -64,6 +75,10 @@ string getSourceCodeFromStream( istream &in )
 
         if( leftBracket==rightBracket ) break;
     }
+    cin.sync();
+
+    cin.get();
+    //cin.get();
     
     return sourceCode; 
 }
@@ -137,13 +152,21 @@ int MatchLength( const string piece, int (*p)(const char *) )
     return 0;
 }
 
+void commandLine()
+{
+    while(1)
+    {
+        vector<Token> Q;
+        string sourceCode = getSourceCodeFromStream( cin );
+        getTokenStream( Q, sourceCode );
+        outputtest( Q );
+    }
+}
+
+
 int main2()
 {
-    vector<Token> Q;
-    string sourceCode = getSourceCodeFromStream( cin );
-    getTokenStream( Q, sourceCode );
-    outputtest( Q );
-
+    commandLine();
 
     return 0;
 }
