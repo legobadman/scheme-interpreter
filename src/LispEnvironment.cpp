@@ -58,3 +58,25 @@ void LispEnvironment::InsertID( string idName, p_AstNode defNode )
     (*it).insertID( idName, defNode );
 }
 
+
+void LispEnvironment::runTimeStackPush()
+{
+    runTimeStack.push_back( SymbolTable() );
+}
+
+void LispEnvironment::runTimeStackPop()
+{
+    runTimeStack.pop_back();
+}
+
+
+
+void LispEnvironment::outputCurrentSymbolTable()
+{
+    vector<SymbolTable>::reverse_iterator it;
+    it = prisoner->runTimeStack.rbegin();
+
+    (*it).outputTable();
+
+}
+
