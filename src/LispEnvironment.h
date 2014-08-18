@@ -3,8 +3,9 @@
 
 #include <cstdlib>
 #include <map>
-//#include <pair>
+#include <stack>
 #include "Tree.h"
+#include "SymbolTable.h"
 
 class LispEnvironment
 {
@@ -18,55 +19,41 @@ public:
         }
         return *prisoner;
     }
-    void TurnOnCalculation(){
+
+    void TurnOnCalculation()
+    {
         prisoner -> is_directly_calculating = 1;
     }
+
     void TurnOffCalculation()
     {
         prisoner -> is_directly_calculating = 0;
     }
+
     int  isAllowdCalculating()
     {
         return prisoner -> is_directly_calculating;
     }
-    p_AstNode SearchSymbol( string idName )
+
+    p_AstNode getSymbol( string idName );
+
+    void InsertID( string idName, p_AstNode defNode );
+
+    map<string,p_AstNode> getCurrentSymbolTable()
     {
-        map<string, p_AstNode>::iterator it;
-        it = prisoner -> SymbolTable.find( idName );
 
-        if( it != SymbolTable.end() )
-        {
-            return it->second;
-        }
-        else
-        {
-            return NULL;
-        }
-    }
-    void InsertID( string idName, p_AstNode defNode )
-    {
-        map< string, p_AstNode >::iterator it;
-
-        it = prisoner -> SymbolTable.find( idName );
-
-        if( it != prisoner->SymbolTable.end() )
-        {
-            prisoner -> SymbolTable.erase( it );
-        }
-        prisoner -> SymbolTable.insert( pair<string,p_AstNode>( idName, defNode ));
     }
 
-    map<string,p_AstNode> getSymbolTable()
-    {
-        return prisoner->SymbolTable;
-    }
     void getAddress()
     {
         cout << prisoner << endl;
     }
+
     p_AstNode ReadOut( p_AstNode );
 
+    void pushArgumentInStack( vector<p_AstNode> & )const;
 
+    
 private:
     static LispEnvironment *prisoner;
     LispEnvironment(){}
@@ -83,8 +70,13 @@ private:
      */
     int is_directly_calculating; 
 
-    /* symbol table for the whole runtime */
-    map<string, p_AstNode> SymbolTable;
+
+    /* when calling define procdure, there should be
+       s runTimeStack recording the argument
+     */
+    
+    vector<SymbolTable> runTimeStack;
+
 };
 
 
