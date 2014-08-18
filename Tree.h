@@ -22,6 +22,7 @@ public:
 
     }
     ASTNode( const string &s ) : name(s) {}
+
     ASTNode( TokenType type, const string &s ) : nodeType(type), name(s)
     {
         if( type == NUM )
@@ -29,6 +30,7 @@ public:
             number = Number(s);        
         }
     }
+
     ASTNode( Number n ) : number(n), nodeType( NUM )
     {
     }
@@ -52,6 +54,10 @@ public:
     vector<p_AstNode> &getChild()
     {
         return child;
+    }
+    p_AstNode getOneChild( int i )
+    {
+        return child[i];
     }
 
     Number &getNumber()
