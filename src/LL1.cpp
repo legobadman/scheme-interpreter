@@ -88,7 +88,7 @@ p_AstNode LL1_exp()
 
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
     /* open the calculation */
-    env.TurnOnCalculation();
+    //env.TurnOnCalculation();
 
     p_AstNode expNode;
 
@@ -132,13 +132,7 @@ p_AstNode LL1_exp()
             vector<p_AstNode> valueList = LL1_exp_();
             procNode -> setChild( valueList );
 
-            /* execute the calculation in the ast
-             * and return a single astnode with the
-             * final value 
-             */
-            //expNode = procNode;
-            expNode = CalculateAST( procNode );
-            //    delete procNode;
+            expNode = env.combineTreeNode( procNode );
         }
         match(")");
     }
@@ -172,14 +166,13 @@ p_AstNode LL1_Value()
         
         if( !vnode )
         {
-            cerr << "%s doesn't exist" << endl;
+            cerr << token.getStrval() << " doesn't exist" << endl;
             exit(0);
         }
         // 需要解读vnode, vnode要么是函数，要么是数值
-        real_value = env.ReadOut( vnode );
-        vnode = real_value;
-
+        // 先考虑vnode 是符号或者参数
     }
+
     else if ( token.getTokenType() == NUM )
     {
         vnode = new ASTNode( NUM, s );
@@ -414,7 +407,7 @@ vector<p_AstNode> LL1_ArguRefList()
     if ( token.getTokenType() == ID )
     {
         match( ID );
-        p_AstNode argument = new ASTNode( ID, token.getStrval() );
+        p_AstNode argument = new ASTNode( ARGUMENT, token.getStrval() );
 
         valueList = LL1_ArguRefList();
 
@@ -443,20 +436,39 @@ p_AstNode LL1_DEF()
 
 
     p_AstNode defobj = LL1_DEFOBJ();
+    p_AstNode defineNode = new ASTNode( DEFINE, defobj->getName() );
+    
+    string objName = defobj->getName();
+
+    vector<p_AstNode> arguments = defobj->getChild();
+    /* 如有参数，开辟新的栈空间进行压栈　*/
+    if( arguments.size()>0 )
+    {
+        /* 产生新的符号表,意味着进入新的作用域　*/
+        env.runTimeStackPush();
+        env.pushArgumentInStack( arguments );
+    }
+
     p_AstNode defbody = LL1_DEFBODY();
 
-    p_AstNode defineNode = new ASTNode( DEFINE, defobj->getName() );
+    /* if there are arguments generated, means that there is a stack */
+    if( arguments.size()>0 )
+    {
+        env.runTimeStackPop();
 
-    /* the first child of define Node is define object */
-    defineNode -> addChild( defobj );
-    /* the second is define body */
-    defineNode -> addChild( defbody );
-    
+        defineNode = new ASTNode( DEFINE, objName );
+        defineNode->addChild( defobj );
+        defineNode->addChild( defbody );
+    }
+    else
+    {
+        defineNode = defbody;
+    }
+
     /* store the id in the symbol table */
-    env.InsertID( defobj->getName(), defineNode );
+    env.InsertID( objName, defineNode );
 
     match(")");
-
 
     return defineNode;
 }
@@ -489,13 +501,12 @@ p_AstNode LL1_DEFOBJ()
         /* Using enum PROC for the user-defined procedure */
         defobj = new ASTNode( PROC, token.getStrval() );
 
+
         vector<p_AstNode> arguList;
         arguList = LL1_ArguRefList();
 
-        /* push the argument into the runtime stack */
-        env.pushArgumentInStack( arguList );         
+        defobj->setChild( arguList );
 
-        //env.testStack();
 
         match( ")" );
     }
@@ -516,9 +527,12 @@ p_AstNode LL1_DEFBODY()
     
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
 
-    if ( token.getStrval() == "(" )
+    string      ts = token.getStrval();
+    TokenType   tt = token.getTokenType();
+
+    if ( ts == "(" || tt==ID || tt==NUM )
     {
-        Token next_token = TokenStream[currentIndex+1];
+        Token next_token = TokenStream[ currentIndex + 1 ];
         if ( next_token.getStrval() == "define" )
         {
             LL1_DEF();
@@ -537,6 +551,7 @@ p_AstNode LL1_DEFBODY()
              *  a   1
              */
 
+            /* maybe it's a number, or a tree with some arguments */
             calcModel = LL1_exp();
 
             /* the following recursion will overlab the previous tree
@@ -553,28 +568,9 @@ p_AstNode LL1_DEFBODY()
             
         }
     }
-    else if ( token.getStrval()==")" )
+    else if ( ts == ")" )
     {
         return NULL;
-    }
-    else if ( token.getTokenType() == ID )
-    {
-        string s = token.getStrval();
-        match(ID);
-        
-
-
-        defbody = env.getSymbol( s );
-
-        /* defbody and the existed Node share a common pointer
-         */
-
-    }
-    else if ( token.getTokenType() == NUM )
-    {
-        match(NUM);
-        string value = token.getStrval();
-        defbody = new ASTNode( Number( value ));
     }
     else
         error("LL1_DEFBODY()");
@@ -743,21 +739,32 @@ p_AstNode LL1_LIST()
 
 int main()
 {
+    LispEnvironment env = LispEnvironment::getRunTimeEnv();
+    env.runTimeStackPush();
+
     while( true )
     {
+        env.TurnOnCalculation();
+
         string sourceCode = getSourceCodeFromStream( cin ); 
         cout << sourceCode << endl;
 
         getTokenStream( TokenStream, sourceCode );
         
-        p_AstNode result = LL1_Lisp();
+        p_AstNode p = LL1_Lisp();
 
-        if( result->getTokenType() == NUM )
+        cout << "输出符号表：" << endl;
+        env.outputCurrentSymbolTable();
+
+
+        if( env.isAllowdCalculating() )
         {
+            p_AstNode result = CalculateAST( p );
             cout << result << endl;
         }
-
-
+        env.TurnOnCalculation();
     }
-        
+
+    env.runTimeStackPop();
+ 
 }
