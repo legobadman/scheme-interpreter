@@ -38,6 +38,7 @@ public:
     p_AstNode getSymbol( string idName );
 
     void InsertID( string idName, p_AstNode defNode );
+    void DeleteID( string idName );
 
     void outputCurrentSymbolTable();
 
