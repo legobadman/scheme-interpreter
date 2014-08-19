@@ -281,27 +281,324 @@ Number Number::operator / (const Number &numobj)
 
 bool Number::operator < (const Number &numobj)
 {
-    return (((type==INT)? i : f) < 
-                ((numobj.type==INT)?numobj.i : numobj.f));
+    Fraction sum;
+    float fraction_to_float, fraction_to_float2;
+
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return i < numobj.i ;
+        case FLOAT:
+            return i < numobj.f ;
+        case FRACTION:
+            fraction_to_float  = (float) numobj.ff.numer / numobj.ff.denom;
+            return i < fraction_to_float; 
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return f < numobj.i;
+        case FLOAT:
+            return f < numobj.f;
+        case FRACTION:
+            fraction_to_float = (float) numobj.ff.numer / numobj.ff.denom;
+            return f < fraction_to_float;
+        }
+        break;
+    case FRACTION:
+        fraction_to_float = (float) ff.numer / ff.denom;
+        switch(numobj.type)
+        {
+        case INT:
+            return fraction_to_float < numobj.i;
+
+        case FLOAT:
+            return fraction_to_float < numobj.f;
+
+        case FRACTION:
+            fraction_to_float2 = (float) numobj.ff.numer / numobj.ff.denom;
+            return fraction_to_float < fraction_to_float2;
+        }
+        break;
+    default:
+        break;
+    }
+
+
+
 }
 
 bool Number::operator <= (const Number &numobj)
 {
-    return (((type==INT)? i : f) <=
-                ((numobj.type==INT)? numobj.i : numobj.f));
+    Fraction sum;
+    float fraction_to_float, fraction_to_float2;
+
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return i <= numobj.i ;
+        case FLOAT:
+            return i <= numobj.f ;
+        case FRACTION:
+            fraction_to_float  = (float) numobj.ff.numer / numobj.ff.denom;
+            return i <= fraction_to_float; 
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return f <= numobj.i;
+        case FLOAT:
+            return f <= numobj.f;
+        case FRACTION:
+            fraction_to_float = (float) numobj.ff.numer / numobj.ff.denom;
+            return f <= fraction_to_float;
+        }
+        break;
+    case FRACTION:
+        fraction_to_float = (float) ff.numer / ff.denom;
+        switch(numobj.type)
+        {
+        case INT:
+            return fraction_to_float <= numobj.i;
+
+        case FLOAT:
+            return fraction_to_float <= numobj.f;
+
+        case FRACTION:
+            fraction_to_float2 = (float) numobj.ff.numer / numobj.ff.denom;
+            return fraction_to_float <= fraction_to_float2;
+        }
+        break;
+    default:
+        break;
+    }
+
+
+
 }
 
 bool Number::operator > (const Number &numobj)
 {
-    return ((type==INT)?i:f ) > ((numobj.type==INT)? numobj.i : numobj.f);
+    Fraction sum;
+    float fraction_to_float, fraction_to_float2;
+
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return i > numobj.i ;
+        case FLOAT:
+            return i > numobj.f ;
+        case FRACTION:
+            fraction_to_float  = (float) numobj.ff.numer / numobj.ff.denom;
+            return i > fraction_to_float; 
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return f > numobj.i;
+        case FLOAT:
+            return f > numobj.f;
+        case FRACTION:
+            fraction_to_float = (float) numobj.ff.numer / numobj.ff.denom;
+            return f > fraction_to_float;
+        }
+        break;
+    case FRACTION:
+        fraction_to_float = (float) ff.numer / ff.denom;
+        switch(numobj.type)
+        {
+        case INT:
+            return fraction_to_float > numobj.i;
+
+        case FLOAT:
+            return fraction_to_float > numobj.f;
+
+        case FRACTION:
+            fraction_to_float2 = (float) numobj.ff.numer / numobj.ff.denom;
+            return fraction_to_float < fraction_to_float2;
+        }
+        break;
+    default:
+        break;
+    }
+
+
+
 }
 
 bool Number::operator >= (const Number &numobj)
 {
-    return ((type==INT)? i : f) >= ((numobj.type==INT)? numobj.i : numobj.f);
+    Fraction sum;
+    float fraction_to_float, fraction_to_float2;
+
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return i >= numobj.i ;
+        case FLOAT:
+            return i >= numobj.f ;
+        case FRACTION:
+            fraction_to_float  = (float) numobj.ff.numer / numobj.ff.denom;
+            return i >= fraction_to_float; 
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return f >= numobj.i;
+        case FLOAT:
+            return f >= numobj.f;
+        case FRACTION:
+            fraction_to_float = (float) numobj.ff.numer / numobj.ff.denom;
+            return f >= fraction_to_float;
+        }
+        break;
+    case FRACTION:
+        fraction_to_float = (float) ff.numer / ff.denom;
+        switch(numobj.type)
+        {
+        case INT:
+            return fraction_to_float >= numobj.i;
+
+        case FLOAT:
+            return fraction_to_float >= numobj.f;
+
+        case FRACTION:
+            fraction_to_float2 = (float) numobj.ff.numer / numobj.ff.denom;
+            return fraction_to_float >= fraction_to_float2;
+        }
+        break;
+    default:
+        break;
+    }
+
+
+
 }
 
 bool Number::operator == (const Number &numobj)
 {
-    return ((type==INT)? i : f) == ((numobj.type==INT)? numobj.i : numobj.f);
+    Fraction sum;
+    float fraction_to_float, fraction_to_float2;
+
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return i == numobj.i ;
+        case FLOAT:
+            return i == numobj.f ;
+        case FRACTION:
+            fraction_to_float  = (float) numobj.ff.numer / numobj.ff.denom;
+            return i == fraction_to_float; 
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return f == numobj.i;
+        case FLOAT:
+            return f == numobj.f;
+        case FRACTION:
+            fraction_to_float = (float) numobj.ff.numer / numobj.ff.denom;
+            return f == fraction_to_float;
+        }
+        break;
+    case FRACTION:
+        fraction_to_float = (float) ff.numer / ff.denom;
+        switch(numobj.type)
+        {
+        case INT:
+            return fraction_to_float == numobj.i;
+
+        case FLOAT:
+            return fraction_to_float == numobj.f;
+
+        case FRACTION:
+            fraction_to_float2 = (float) numobj.ff.numer / numobj.ff.denom;
+            return fraction_to_float == fraction_to_float2;
+        }
+        break;
+    default:
+        break;
+    }
+
+
+
+}
+
+bool Number::operator != (const Number &numobj)
+{
+    Fraction sum;
+    float fraction_to_float, fraction_to_float2;
+
+    switch(type)
+    {
+    case INT:
+        switch(numobj.type)
+        {
+        case INT:
+            return i != numobj.i ;
+        case FLOAT:
+            return i != numobj.f ;
+        case FRACTION:
+            fraction_to_float  = (float) numobj.ff.numer / numobj.ff.denom;
+            return i != fraction_to_float; 
+        }
+        break;
+    case FLOAT:
+        switch(numobj.type)
+        {
+        case INT:
+            return f != numobj.i;
+        case FLOAT:
+            return f != numobj.f;
+        case FRACTION:
+            fraction_to_float = (float) numobj.ff.numer / numobj.ff.denom;
+            return f != fraction_to_float;
+        }
+        break;
+    case FRACTION:
+        fraction_to_float = (float) ff.numer / ff.denom;
+        switch(numobj.type)
+        {
+        case INT:
+            return fraction_to_float != numobj.i;
+
+        case FLOAT:
+            return fraction_to_float != numobj.f;
+
+        case FRACTION:
+            fraction_to_float2 = (float) numobj.ff.numer / numobj.ff.denom;
+            return fraction_to_float != fraction_to_float2;
+        }
+        break;
+    default:
+        break;
+    }
+
+
+
 }
