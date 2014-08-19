@@ -60,7 +60,7 @@ public:
         return child[i];
     }
 
-    Number &getNumber()
+    Number getNumber()
     {
         return number;
     }
@@ -98,11 +98,11 @@ public:
             break;
         
         case NUM:
-            out << pt->name << " : " << pt->number;
+            out << pt->number;
             break;
 
         case ARGUMENT:
-            out << pt->name << " : " << "ARGUMENT";
+            out << pt->name;
             break;
 
         default:
