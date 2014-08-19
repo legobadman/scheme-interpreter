@@ -437,9 +437,9 @@ p_AstNode LL1_DEF()
     env.TurnOffCalculation();
 
 
+    p_AstNode defineNode;
+
     p_AstNode defobj = LL1_DEFOBJ();
-    p_AstNode defineNode = new ASTNode( DEFINE, defobj->getName() );
-    
     string objName = defobj->getName();
 
     vector<p_AstNode> arguments = defobj->getChild();
@@ -461,7 +461,7 @@ p_AstNode LL1_DEF()
     {
         env.runTimeStackPop();
 
-        defineNode = new ASTNode( DEFINE, objName );
+        defineNode = new ASTNode( PROC, objName );
         defineNode->addChild( defobj );
         defineNode->addChild( defbody );
     }
@@ -470,7 +470,17 @@ p_AstNode LL1_DEF()
         defineNode = defbody;
     }
 
-    /* store the id in the symbol table */
+    /* store the id in the symbol table
+     * if the proc with the same name exists, 
+     * overlab this old proc
+     */
+
+    p_AstNode p = env.getSymbol( objName );
+    if( p!=NULL )
+    {
+        env.DeleteID( objName );    
+    }
+
     env.InsertID( objName, defineNode );
 
     match(")");
@@ -505,7 +515,6 @@ p_AstNode LL1_DEFOBJ()
         
         /* Using enum PROC for the user-defined procedure */
         defobj = new ASTNode( PROC, token.getStrval() );
-
 
         vector<p_AstNode> arguList;
         arguList = LL1_ArguRefList();
