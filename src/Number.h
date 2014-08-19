@@ -39,6 +39,7 @@ public:
     bool operator > (const Number& );
     bool operator >= (const Number& );
     bool operator == (const Number& );
+    bool operator != (const Number &numobj);
 
 private:
     float   f;
