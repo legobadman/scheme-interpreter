@@ -29,8 +29,7 @@ void SymbolTable::outputTable()
     
     for(it = T.begin(); it != T.end(); it++ )
     {
-        p_AstNode p = it->second;
-        cout << p << endl;
+        cout << "[" << it->first << "]:  " << it->second << endl;
     }
 
 }
