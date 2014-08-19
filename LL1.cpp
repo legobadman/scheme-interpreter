@@ -8,6 +8,7 @@
 #include "LL1.h"
 #include "LispEnvironment.h"
 #include <stdlib.h>
+#include "procedure.h"
 
 using namespace std;
 
@@ -132,7 +133,8 @@ p_AstNode LL1_exp()
             vector<p_AstNode> valueList = LL1_exp_();
             procNode -> setChild( valueList );
 
-            expNode = env.combineTreeNode( procNode );
+            expNode = procNode;
+
         }
         match(")");
     }
@@ -447,7 +449,10 @@ p_AstNode LL1_DEF()
         /* 产生新的符号表,意味着进入新的作用域　*/
         env.runTimeStackPush();
         env.pushArgumentInStack( arguments );
+        env.TurnOffCalculation();
     }
+    else
+        env.TurnOnCalculation();
 
     p_AstNode defbody = LL1_DEFBODY();
 
@@ -553,6 +558,8 @@ p_AstNode LL1_DEFBODY()
 
             /* maybe it's a number, or a tree with some arguments */
             calcModel = LL1_exp();
+            if( env.isAllowdCalculating() )
+                calcModel = interpreter( calcModel );
 
             /* the following recursion will overlab the previous tree
              */
@@ -759,7 +766,7 @@ int main()
 
         if( env.isAllowdCalculating() )
         {
-            p_AstNode result = CalculateAST( p );
+            p_AstNode result = interpreter( p );
             cout << result << endl;
         }
         env.TurnOnCalculation();
