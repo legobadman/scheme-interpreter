@@ -50,8 +50,6 @@ public:
 
     void runTimeStackPop();
 
-    p_AstNode ReadOut( p_AstNode );
-
     void pushArgumentInStack( vector<p_AstNode> & )const;
 
     
@@ -70,7 +68,6 @@ private:
      * will generate a parsed tree as a function model
      */
     int is_directly_calculating; 
-
 
     /* when calling define procdure, there should be
        s runTimeStack recording the argument
