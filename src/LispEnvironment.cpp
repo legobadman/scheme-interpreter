@@ -63,3 +63,13 @@ void LispEnvironment::outputCurrentSymbolTable()
 
 }
 
+void LispEnvironment::DeleteID( string idName )
+{
+    vector<SymbolTable>::reverse_iterator it;
+    it = prisoner->runTimeStack.rbegin();
+    
+    (*it).deleteID( idName );
+}
+
+
+
