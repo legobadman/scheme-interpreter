@@ -11,8 +11,8 @@ using namespace std;
 typedef class ASTNode *p_AstNode;
 
 
-extern p_AstNode CalculateAST( p_AstNode ast_root );
-
+p_AstNode CalculateAST( p_AstNode ast_root );
+void printProcTree( p_AstNode, string );
 
 class ASTNode{
 public:
@@ -82,6 +82,7 @@ public:
 
     friend std::ostream &operator<< ( std::ostream &out, p_AstNode pt)
     {
+        vector<p_AstNode> arguList;
         switch(pt->nodeType)
         {
         case CONS: 
@@ -103,6 +104,15 @@ public:
 
         case ARGUMENT:
             out << pt->name;
+            break;
+        
+        case PROC:
+            out << "procdure "<< pt->getName() << "( "; 
+            arguList = pt->getOneChild(0)->getChild();
+            for( int i=0; i<arguList.size(); i++ )
+                cout << arguList[i]->getName() << " ";
+            cout << ")" << endl;
+            printProcTree( pt->getOneChild(1),"\t" );
             break;
 
         default:
