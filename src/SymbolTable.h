@@ -11,7 +11,9 @@ class SymbolTable
 public:
     /* insert the node, coresponding to the name */
     void insertID( string idName, p_AstNode node );
-
+    void deleteID( string idName );
+    
+    ~SymbolTable();
 
     p_AstNode getSymbol( string idName );
     
