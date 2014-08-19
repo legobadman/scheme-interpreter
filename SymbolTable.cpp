@@ -6,7 +6,10 @@ void SymbolTable::insertID( string idName, p_AstNode node )
     T.insert( pair<std::string,p_AstNode>( idName, node ));
 }
 
-
+void SymbolTable::deleteID( string idName )
+{
+    T.erase(idName);
+}
 
 p_AstNode SymbolTable::getSymbol( string idName )
 {
@@ -33,3 +36,21 @@ void SymbolTable::outputTable()
     }
 
 }
+
+
+SymbolTable::~SymbolTable()
+{
+    map<std::string,p_AstNode>::iterator it;
+
+    //cout << "SymbolTable :: ~SymbolTable()" << endl;
+
+    for(it = T.begin(); it != T.end(); it++ )
+    {
+    }
+}
+
+
+
+
+
+
