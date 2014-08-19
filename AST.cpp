@@ -99,3 +99,21 @@ p_AstNode CalculateAST( p_AstNode ast_root )
 
     return resultNode;
 }
+
+
+void printProcTree( p_AstNode root, string tabs )
+{
+    if( root->getChild().size()==0 )
+    {
+        cout << tabs << root->getName() << endl;
+    }
+    else
+    {
+        cout << tabs << root->getName() << endl;
+        for( int i=0; i<root->getChild().size(); i++ )
+        {
+            printProcTree( root->getChild()[i], tabs+"\t" );
+        }
+    }
+
+}
