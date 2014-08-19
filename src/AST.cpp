@@ -18,7 +18,7 @@ p_AstNode CalculateAST( p_AstNode ast_root )
     Number      x(0), numobj;
 
     TokenType type = ast_root->getTokenType();
-    
+
 
     if( type == ARITH_OP )
     {
