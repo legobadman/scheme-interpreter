@@ -1,33 +1,9 @@
 #include "LispEnvironment.h"
+#include "procedure.h"
 
 
 LispEnvironment* LispEnvironment::prisoner = NULL;
 
-
-p_AstNode LispEnvironment::ReadOut(p_AstNode p)
-{
-    p_AstNode idNode, bodyNode, finalNode;
-
-    switch( p->getTokenType() )
-    {
-    case DEFINE:
-        idNode = p->getOneChild(0);
-        bodyNode = p->getOneChild(1);
-        if( idNode->getChild().size() == 0 )
-        {
-            // 单个标识符
-            finalNode = bodyNode;
-        }
-        else
-        {
-            // 函数
-        }
-    default:
-        break;
-    }
-
-    return finalNode;
-}
 
 
 void LispEnvironment::pushArgumentInStack(vector<p_AstNode> &arguList)const
@@ -46,8 +22,16 @@ void LispEnvironment::pushArgumentInStack(vector<p_AstNode> &arguList)const
 p_AstNode LispEnvironment::getSymbol( string idName )
 {
     vector<SymbolTable>::reverse_iterator it = prisoner->runTimeStack.rbegin();
+    
+    p_AstNode p = NULL;
+    for( ; it != prisoner->runTimeStack.rend(); it++ )
+    {
+        p = (*it).getSymbol( idName );
+        if( p!=NULL )
+            break;
+    }
 
-    return (*it).getSymbol( idName );
+    return p;
 }
 
 void LispEnvironment::InsertID( string idName, p_AstNode defNode )
@@ -61,14 +45,13 @@ void LispEnvironment::InsertID( string idName, p_AstNode defNode )
 
 void LispEnvironment::runTimeStackPush()
 {
-    runTimeStack.push_back( SymbolTable() );
+    prisoner -> runTimeStack.push_back( SymbolTable() );
 }
 
 void LispEnvironment::runTimeStackPop()
 {
-    runTimeStack.pop_back();
+    prisoner -> runTimeStack.pop_back();
 }
-
 
 
 void LispEnvironment::outputCurrentSymbolTable()
