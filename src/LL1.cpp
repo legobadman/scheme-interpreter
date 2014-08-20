@@ -215,6 +215,8 @@ p_AstNode LL1_procedure()
     else if ( token.getTokenType() ==ID )
     {
         match(ID);
+        procNode = new ASTNode( PROC, token.getStrval() );
+
     }
 
     else
@@ -771,7 +773,11 @@ int main()
 
         cout << "输出符号表：" << endl;
         env.outputCurrentSymbolTable();
+        cout << endl;
 
+        cout << "语法树: " << endl;
+        printProcTree( p, "\t" );
+        cout << endl;
 
         if( env.isAllowdCalculating() )
         {
