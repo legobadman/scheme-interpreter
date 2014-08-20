@@ -454,7 +454,9 @@ p_AstNode LL1_DEF()
         env.TurnOffCalculation();
     }
     else
+    {
         env.TurnOnCalculation();
+    }
 
     p_AstNode defbody = LL1_DEFBODY();
 
@@ -486,6 +488,8 @@ p_AstNode LL1_DEF()
     env.InsertID( objName, defineNode );
 
     match(")");
+    
+    env.TurnOffCalculation();
 
     return defineNode;
 }
@@ -552,7 +556,7 @@ p_AstNode LL1_DEFBODY()
         if ( next_token.getStrval() == "define" )
         {
             LL1_DEF();
-            LL1_DEFBODY();
+            defbody = LL1_DEFBODY();
         }
         else
         {
@@ -569,8 +573,9 @@ p_AstNode LL1_DEFBODY()
 
             /* maybe it's a number, or a tree with some arguments */
             calcModel = LL1_exp();
-            if( env.isAllowdCalculating() )
-                calcModel = interpreter( calcModel );
+            //if( env.isAllowdCalculating() )
+            
+            //calcModel = interpreter( calcModel );
 
             /* the following recursion will overlab the previous tree
              */
@@ -771,6 +776,7 @@ int main()
         
         p_AstNode p = LL1_Lisp();
 
+        /*
         cout << "输出符号表：" << endl;
         env.outputCurrentSymbolTable();
         cout << endl;
@@ -778,7 +784,8 @@ int main()
         cout << "语法树: " << endl;
         printProcTree( p, "\t" );
         cout << endl;
-
+        */
+        
         if( env.isAllowdCalculating() )
         {
             p_AstNode result = interpreter( p );
