@@ -14,6 +14,9 @@ typedef class ASTNode *p_AstNode;
 p_AstNode CalculateAST( p_AstNode ast_root );
 void printProcTree( p_AstNode, string );
 
+p_AstNode   deepCopy( const p_AstNode );
+ostream &operator<< ( std::ostream &out, p_AstNode pt);
+
 class ASTNode{
 public:
     ASTNode(){}
@@ -45,7 +48,7 @@ public:
     {
         child.push_back( p );
     }
-    
+
     string getName()
     {
         return name;
@@ -65,12 +68,17 @@ public:
         return number;
     }
 
-    void setChild(vector<p_AstNode> Q)
+    void setNumber( Number num )
+    {
+        number = num;    
+    }
+
+    void setChild( vector<p_AstNode> Q )
     {
         child = Q;
     }
 
-    void setTokenType(TokenType t)
+    void setTokenType( TokenType t )
     {
         nodeType = t;
     }
@@ -80,50 +88,7 @@ public:
         return nodeType;
     }
 
-    friend std::ostream &operator<< ( std::ostream &out, p_AstNode pt)
-    {
-        vector<p_AstNode> arguList;
-        switch(pt->nodeType)
-        {
-        case CONS: 
-            out << "(" << pt->child[0]->getNumber()
-                << " . " << pt->child[1]->getNumber()
-                << ")";
-            break;
-
-        case LIST:
-            out << "(";
-            for( int i=0; i<pt->child.size(); i++ )
-                out << pt->child[i]->getNumber() <<" ";
-            out << ")" << endl;
-            break;
-        
-        case NUM:
-            out << pt->number;
-            break;
-
-        case ARGUMENT:
-            out << pt->name;
-            break;
-        
-        case PROC:
-            out << "procdure "<< pt->getName() << "( "; 
-            arguList = pt->getOneChild(0)->getChild();
-            for( int i=0; i<arguList.size(); i++ )
-                cout << arguList[i]->getName() << " ";
-            cout << ")" << endl;
-            printProcTree( pt->getOneChild(1),"\t" );
-            break;
-
-        case CAR:
-            
-
-        default:
-            out << pt->getNumber();
-            break;
-        }
-        return out;
-    }
+    friend ostream &operator<< ( std::ostream &out, p_AstNode pt);
 
 private:
 
