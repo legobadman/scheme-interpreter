@@ -32,7 +32,7 @@ void match( TokenType type )
     if ( token.getTokenType() == type )
     {
         currentIndex++;
-        cout << "match " << token.getStrval() << endl;
+        //cout << "match " << token.getStrval() << endl;
     }
     else
     {
@@ -48,7 +48,7 @@ void match( string s )
     if ( token.getStrval() == s )
     {
         currentIndex++;
-        cout << "match " << token.getStrval() << endl;
+        //cout << "match " << token.getStrval() << endl;
     }
     else
     {
@@ -119,9 +119,7 @@ p_AstNode LL1_exp()
         }
         else if ( str == "cdr" )
         {
-            vector<p_AstNode> Q = LL1_CDR();
-            expNode = new ASTNode( CDR,"cdr" );
-            expNode->setChild( Q );
+            expNode = LL1_CDR(); 
         }
         else if ( str == "list" )
         {
@@ -709,42 +707,22 @@ p_AstNode LL1_CAR()
 {
     match("car");
     p_AstNode consNode = LL1_exp();
-    // check whether it has only two childNode
-    vector<p_AstNode> Q = consNode->getChild();
+        
+    p_AstNode carNode = new ASTNode(CAR,"car");
+    carNode->addChild( consNode );
 
-    if( consNode->getTokenType() != LIST && 
-        consNode->getTokenType() != CONS )
-    {
-        cerr << "car操作针对错误的类型。" << endl;
-        exit(0);
-    }
-    else
-    {
-        // get the first element in the cons
-        return Q[0];
-    }
+    return carNode;    
 }
 
-vector<p_AstNode> LL1_CDR()
-{
+p_AstNode LL1_CDR()
+{ 
     match("cdr");
     p_AstNode consNode = LL1_exp();
-    // check whether it has only two childNode
-    vector<p_AstNode> Q;
-    if( consNode->getTokenType() != LIST &&
-        consNode->getTokenType() != CONS )
-    {
-        cerr << "car操作针对错误的类型。" << endl;
-        exit(0);
-    }
-    else
-    {
-        // get the first element in the cons
-        vector<p_AstNode>child = consNode->getChild();
-        for( int i=1; i<child.size(); i++ )
-            Q.push_back( child[i] ); 
-        return Q;
-    }
+        
+    p_AstNode cdrNode = new ASTNode(CDR,"cdr");
+    cdrNode->addChild( consNode );
+
+    return cdrNode;    
 
 }
 
@@ -770,7 +748,6 @@ int main()
         env.TurnOnCalculation();
 
         string sourceCode = getSourceCodeFromStream( cin ); 
-        cout << sourceCode << endl;
 
         getTokenStream( TokenStream, sourceCode );
         
