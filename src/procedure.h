@@ -35,9 +35,9 @@ p_AstNode Not( vector<p_AstNode>& );
 
 vector<p_AstNode> getFormalArgument( const p_AstNode procNode );
 
-p_AstNode callProcedure( string procName, vector<p_AstNode> ValueList );
+p_AstNode callProcedure (string procName, vector<p_AstNode> ValueList );
 
-p_AstNode assignArgument( const p_AstNode root, map<string,Number> actualArgument );
+p_AstNode assignArgument (const p_AstNode, map<string, p_AstNode>);
 
 
 
