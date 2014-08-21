@@ -94,7 +94,9 @@ p_AstNode interpreter( p_AstNode root )
     
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
 
-    p_AstNode   result;
+    p_AstNode   result, temp;
+    p_AstNode   childNode, consNode;
+    vector<p_AstNode> valueList;
 
     switch( root->getTokenType() )
     {
@@ -162,15 +164,57 @@ p_AstNode interpreter( p_AstNode root )
     
     case PROC:
         result = callProcedure( rootName, childList );
+        //printProcTree( result, "\t" );
+
         result = interpreter( result );
         break;
 
     case ARGUMENT:
+        break;
+
+    case CONS:
+        result = root;
+        break;
+
+    case LIST:
+        result = root;
+        break;
+
+    case CAR:
+            
+    case CDR:
+        
+        consNode = root->getOneChild(0);        
+        if( consNode->getTokenType() != LIST &&
+            consNode->getTokenType() != CONS )
+        {
+            cerr << "car操作针对错误的类型。" << endl;
+            exit(0);
+        }
+        else
+        {
+            vector<p_AstNode> valueList = consNode->getChild();
+            if( root->getTokenType() == CAR )
+            {
+                // return the first element.
+                result = valueList[0]; 
+            }
+            else
+            {
+                result = new ASTNode( LIST, "cons" );
+                vector<p_AstNode> subList;
+                subList.assign( valueList.begin()+1, valueList.end() );
+
+                result->setChild( subList );
+            }
+        }
+        break;
 
 
     case IF:
         /* reguard any positive as true symbol */
-        if( interpreter( root->getOneChild(0) ) > 0 )
+        temp = interpreter( root->getOneChild(0) );
+        if( temp->getNumber() > 0 )
         {
             result = interpreter(root->getOneChild(1)); 
         }
@@ -182,7 +226,6 @@ p_AstNode interpreter( p_AstNode root )
 
     return result;
 }
-
 
 
 
@@ -368,6 +411,7 @@ p_AstNode callProcedure( string procName, vector<p_AstNode> ValueList )
 
     for( int i=0; i<formalArgument.size(); i++ )
     {
+        /* 形参 */
         string arguName = formalArgument[i]->getName();
         Number arguValue = interpreter( ValueList[i] )->getNumber();
 
@@ -416,5 +460,3 @@ p_AstNode assignArgument( const p_AstNode root, map<string,Number> actualArgumen
 
     return newNode;
 }
-
-
