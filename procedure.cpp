@@ -390,42 +390,46 @@ vector<p_AstNode> getFormalArgument( const p_AstNode procNode )
 
 p_AstNode callProcedure( string procName, vector<p_AstNode> ValueList )
 {
-    p_AstNode procNode;
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
+    p_AstNode root = env.getSymbol( procName );
 
-    procNode = env.getSymbol( procName );
-
-    if( !procNode )
+    if( !root )
     {
         cerr << "Undefined procedure: "<< procName << endl;
         exit(0);
     }
 
-    vector<p_AstNode> formalArgument = getFormalArgument( procNode );
+    vector<p_AstNode> formalArgument = getFormalArgument( root );
     if( ValueList.size() != formalArgument.size() )
     {
         cerr << "The arguments didn't match" << endl;
     }
 
-    map<string,Number> actualArgument;
+    /* map the formal argument into the actual value */
+    map< string, p_AstNode> formal_to_actual;
 
     for( int i=0; i<formalArgument.size(); i++ )
     {
-        /* 形参 */
-        string arguName = formalArgument[i]->getName();
-        Number arguValue = interpreter( ValueList[i] )->getNumber();
+        /* get the (formal argument, actual argument) pair */
+        string formalArgu = formalArgument[i]->getName();
+        p_AstNode actualArgu = interpreter( ValueList[i] );
 
-        actualArgument[ arguName ] = arguValue;
+        formal_to_actual[ formalArgu ] = actualArgu;
     }
 
-    procNode = procNode -> getOneChild(1);
-    p_AstNode assignedTree = assignArgument( procNode, actualArgument );
+    p_AstNode assignedTree = assignArgument( 
+                                root->getOneChild(1), 
+                                formal_to_actual 
+                            );
 
     return assignedTree;
 }
 
 
-p_AstNode assignArgument( const p_AstNode root, map<string,Number> actualArgument )
+p_AstNode assignArgument( 
+                            const p_AstNode root, 
+                            map<string, p_AstNode> formal_to_actual 
+                    )
 {
     
     vector<p_AstNode> childList = root->getChild();
@@ -437,7 +441,7 @@ p_AstNode assignArgument( const p_AstNode root, map<string,Number> actualArgumen
 
     if( type == ARGUMENT )
     {
-        newNode = new ASTNode( actualArgument[root->getName()] );
+        newNode = formal_to_actual[ root->getName() ];
     }
     else if( type == NUM )
     {
@@ -446,14 +450,20 @@ p_AstNode assignArgument( const p_AstNode root, map<string,Number> actualArgumen
     }
     else if( type == ID )
     {
-        newNode = new ASTNode( env.getSymbol( name )->getNumber() );
+        p_AstNode   searchNode = env.getSymbol( name );
+        if( !searchNode )
+        {
+            cerr << "No such identifier: " << name << endl;
+            exit(0);
+        }
+        newNode = new ASTNode( searchNode->getNumber() );
     }
     else
     {
         newNode = new ASTNode( type, name ); 
         for( int i=0; i<childList.size(); i++ )
         {
-            p_AstNode newChild = assignArgument( childList[i], actualArgument );
+            p_AstNode newChild = assignArgument( childList[i], formal_to_actual );
             newNode->addChild( newChild );
         }
     }
