@@ -40,7 +40,7 @@ p_AstNode LL1_DEFBODY();
 
 p_AstNode LL1_CONS();
 p_AstNode LL1_CAR();
-std::vector<p_AstNode> LL1_CDR();
+p_AstNode LL1_CDR();
 
 p_AstNode LL1_LIST();
 
