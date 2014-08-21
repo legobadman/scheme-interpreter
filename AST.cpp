@@ -117,3 +117,67 @@ void printProcTree( p_AstNode root, string tabs )
     }
 
 }
+
+p_AstNode   deepCopy( const p_AstNode pt_source )
+{
+    p_AstNode newNode;
+    vector<p_AstNode> child = pt_source->getChild();
+
+    newNode = new ASTNode( pt_source->getName() );
+    newNode->setTokenType ( pt_source->getTokenType() );
+    newNode->setNumber( pt_source->getNumber() );
+
+    for( int i=0; i < child.size(); i++ )
+        newNode->addChild( deepCopy( child[i] ) );
+
+    return newNode;
+
+}
+
+
+ostream &operator<< ( std::ostream &out, p_AstNode pt)
+{
+    vector<p_AstNode> arguList;
+    switch(pt->nodeType)
+    {
+    case CONS: 
+        out << "(" << pt->child[0]->getNumber()
+            << " . " << pt->child[1]->getNumber()
+            << ")";
+        break;
+
+    case LIST:
+        out << "(";
+        for( int i=0; i<pt->child.size(); i++ )
+            out << pt->child[i]->getNumber() <<" ";
+        out << ")" << endl;
+        break;
+        
+    case NUM:
+        out << pt->number;
+        break;
+
+    case ARGUMENT:
+        out << pt->name;
+        break;
+        
+    case PROC:
+        out << "procdure "<< pt->getName() << "( "; 
+        arguList = pt->getOneChild(0)->getChild();
+        for( int i=0; i<arguList.size(); i++ )
+            cout << arguList[i]->getName() << " ";
+        cout << ")" << endl;
+        printProcTree( pt->getOneChild(1),"\t" );
+        break;
+
+    case CAR:
+            
+
+    default:
+        out << pt->getNumber();
+        break;
+    }
+    return out;
+}
+
+
