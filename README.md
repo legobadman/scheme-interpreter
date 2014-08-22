@@ -7,7 +7,7 @@ scheme-interpreter
 
 2.  command-line test 
     
-    >>> (+ 1 2)
+    \> (+ 1 2)
     2
 
     >>> (define a 1)
