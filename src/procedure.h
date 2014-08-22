@@ -7,6 +7,7 @@
 p_AstNode interpreter( p_AstNode );
 
 
+p_AstNode substitudeArgument( p_AstNode lambNode, vector<p_AstNode> valueList );
 
 p_AstNode add( vector<p_AstNode> &);
 
@@ -36,6 +37,8 @@ p_AstNode Not( vector<p_AstNode>& );
 vector<p_AstNode> getFormalArgument( const p_AstNode procNode );
 
 p_AstNode callProcedure (string procName, vector<p_AstNode> ValueList );
+
+p_AstNode callTemperoryProcedure (p_AstNode);
 
 p_AstNode assignArgument (const p_AstNode, map<string, p_AstNode>);
 
