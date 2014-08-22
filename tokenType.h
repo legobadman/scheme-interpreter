@@ -16,6 +16,7 @@ enum TokenType
      */
 
     PROC,       /* user_defined procedure */
+    LAMBDA,     /* lambda */
     CONS,       /* cons */
     LIST,       /* list type */
     DEFINE,     /* define */
