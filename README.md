@@ -16,8 +16,8 @@ scheme-interpreter
     3
 
     \>\>\>  (define (fac n)  
-<p>             (if (= n 1) 1</p>
-          (* n (fac (- n 1)))))  
+<h5>          (if (= n 1) 1</h5>
+<h5>            (* n (fac (- n 1)))))</h5>  
 
     \>\>\>  (fac 10)  
     3628800
