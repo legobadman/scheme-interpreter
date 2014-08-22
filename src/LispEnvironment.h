@@ -36,16 +36,13 @@ public:
     }
 
     p_AstNode getSymbol( string idName );
+    bool isSymbolInCurrentStack( string idName );
 
     void InsertID( string idName, p_AstNode defNode );
     void DeleteID( string idName );
 
     void outputCurrentSymbolTable();
 
-    void getAddress()
-    {
-        cout << prisoner << endl;
-    }
 
     void runTimeStackPush();
 
