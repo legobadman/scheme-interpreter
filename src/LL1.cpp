@@ -105,34 +105,46 @@ p_AstNode LL1_exp()
         {
             expNode = LL1_IF();
         }
-        else if ( str == "let" )
+        else if (str == "let")
         {
             LL1_LET();
         }
-        else if ( str == "cons" )
+        else if (str == "cons")
         {
             expNode = LL1_CONS();
         }
-        else if ( str == "car" )
+        else if (str == "car")
         {
             expNode = LL1_CAR();
         }
-        else if ( str == "cdr" )
+        else if (str == "cdr")
         {
             expNode = LL1_CDR(); 
         }
-        else if ( str == "list" )
+        else if (str == "list")
         {
             expNode = LL1_LIST();
         }
+
+        else if (str == "lambda")
+        {
+            expNode = LL1_LAMB();
+        }
+
         else
         {
             p_AstNode procNode = LL1_procedure();
             vector<p_AstNode> valueList = LL1_exp_();
-            procNode -> setChild( valueList );
 
-            expNode = procNode;
-
+            if (procNode->getTokenType() == LAMBDA)
+            {
+                expNode = substitudeArgument( procNode, valueList );
+            }
+            else
+            {
+                procNode -> setChild( valueList );
+                expNode = procNode;
+            }
         }
         match(")");
     }
@@ -151,37 +163,55 @@ p_AstNode LL1_exp()
 p_AstNode LL1_Value()
 {
     Token token = TokenStream[currentIndex];
-    string s = token.getStrval();
+    
+    string      token_string = token.getStrval();
+    TokenType   token_type = token.getTokenType();
 
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
 
-    p_AstNode vnode, real_value;
+    p_AstNode returnNode;
 
-    if ( token.getStrval() == "\"" )
+    if ( token_string == "\"" )
+    {
         match("\"");
-    else if ( token.getTokenType() == ID )
+
+    }
+    else if ( token_type == ID )
     {
         match( ID );
-        vnode = env.getSymbol( token.getStrval() );
-        
-        if( !vnode )
+    
+        p_AstNode searchNode = env.getSymbol( token_string );
+        if (searchNode -> getTokenType() == NUM)
+        {
+            returnNode = new ASTNode(ID, token_string);
+        }
+        else
+        {
+            returnNode = deepCopy (searchNode);
+        }
+        /*
+        returnNode = deepCopy( searchNode );    
+        if( !returnNode )
         {
             cerr << token.getStrval() << " doesn't exist" << endl;
             exit(0);
         }
-        // 需要解读vnode, vnode要么是函数，要么是数值
-        // 先考虑vnode 是符号或者参数
+        */
     }
 
-    else if ( token.getTokenType() == NUM )
+    else if ( token_type == NUM )
     {
-        vnode = new ASTNode( NUM, s );
+        returnNode = new ASTNode( NUM, token_string );
         match( NUM );
     }
+    else if ( token_type == ARGUMENT )
+    {
+    }
+
     else 
         error("LL1_Value()");
 
-    return vnode;
+    return returnNode;
 
 }
 
@@ -202,19 +232,18 @@ p_AstNode LL1_procedure()
     else if ( str=="and" || str=="or" || str=="not" )
         procNode = LL1_Boolop();
 
+    //else if (str == "lambda")
+    //    procNode = LL1_LAMB();
+
     else if ( str=="(" )
     {
-        if( TokenStream[currentIndex+1].getStrval() == "lambda" )
-            procNode = LL1_LAMB();
-        else
-            procNode = LL1_exp();
+        procNode = LL1_exp();
     }
 
     else if ( token.getTokenType() ==ID )
     {
         match(ID);
         procNode = new ASTNode( PROC, token.getStrval() );
-
     }
 
     else
@@ -313,16 +342,56 @@ p_AstNode LL1_Boolop()
     return newnode;
 }
 
+/* lambda structure:
+    
+    LAMB
+        formalArguNode
+            argument1
+            argument2
+            ...
+        body
+            parsedTree
+
+ */
+
+
 p_AstNode LL1_LAMB()
 {
-    match( "(" );
+    LispEnvironment env = LispEnvironment::getRunTimeEnv();
     match( "lambda" );
     match( "(" );
-    LL1_ArguRefList();
-    match( ")" );
-    LL1_exp();
-    match( ")" );
 
+    /* generate a formal argument node */
+    p_AstNode formalArguNode = new ASTNode("lambda");
+    
+    vector<p_AstNode> arguments = LL1_ArguRefList();
+    match( ")" );
+    
+    formalArguNode -> setChild( arguments );
+
+    if( arguments.size()>0 )
+    {
+        /* 产生新的符号表,意味着进入新的作用域　*/
+        env.runTimeStackPush();
+        env.pushArgumentInStack( arguments );
+        env.TurnOffCalculation();
+    }
+
+    /* function body */
+    p_AstNode bodyNode = LL1_exp();
+
+    env.runTimeStackPop();
+    env.TurnOnCalculation();
+    
+    //match( ")" );
+    
+    p_AstNode lambNode = new ASTNode;
+    lambNode -> setTokenType( LAMBDA );
+
+    lambNode -> addChild( formalArguNode );
+    lambNode -> addChild( bodyNode );
+
+    return lambNode;
 }
 
 /* 返回引用还是值返回? */
@@ -461,11 +530,10 @@ p_AstNode LL1_DEF()
     /* if there are arguments generated, means that there is a stack */
     if( arguments.size()>0 )
     {
-        env.runTimeStackPop();
-
         defineNode = new ASTNode( PROC, objName );
         defineNode->addChild( defobj );
         defineNode->addChild( defbody );
+        env.runTimeStackPop();
     }
     else
     {
@@ -571,9 +639,8 @@ p_AstNode LL1_DEFBODY()
 
             /* maybe it's a number, or a tree with some arguments */
             calcModel = LL1_exp();
-            //if( env.isAllowdCalculating() )
             
-            //calcModel = interpreter( calcModel );
+            //calcModel = callTemperoryProcedure( calcModel );
 
             /* the following recursion will overlab the previous tree
              */
@@ -767,6 +834,7 @@ int main()
         {
             p_AstNode result = interpreter( p );
             cout << result << endl;
+            delete result;
         }
         env.TurnOnCalculation();
     }
