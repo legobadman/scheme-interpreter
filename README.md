@@ -21,3 +21,8 @@ scheme-interpreter
 
     \>\>\>　(fac 10)  
     3628800
+    
+    #support fraction
+    \>\>\>  (+ 2/3 (+ 2 2/3))  
+    10/3
+    
