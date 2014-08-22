@@ -58,6 +58,7 @@ public:
     {
         return child;
     }
+
     p_AstNode getOneChild( int i )
     {
         return child[i];
@@ -76,6 +77,12 @@ public:
     void setChild( vector<p_AstNode> Q )
     {
         child = Q;
+    }
+
+    void setOneChild( int i, p_AstNode newNode )
+    {
+        if (i < child.size())
+            child[i] = newNode;
     }
 
     void setTokenType( TokenType t )
