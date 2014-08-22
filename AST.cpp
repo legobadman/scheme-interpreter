@@ -138,6 +138,8 @@ p_AstNode   deepCopy( const p_AstNode pt_source )
 ostream &operator<< ( std::ostream &out, p_AstNode pt)
 {
     vector<p_AstNode> arguList;
+    p_AstNode procNode;
+
     switch(pt->nodeType)
     {
     case CONS: 
@@ -160,15 +162,24 @@ ostream &operator<< ( std::ostream &out, p_AstNode pt)
     case ARGUMENT:
         out << pt->name;
         break;
-        
+
+    case LAMBDA:
+        procNode = pt->getOneChild(1);
+        printProcTree( procNode, "\t" );
+        break;
+
     case PROC:
-        out << "procdure "<< pt->getName() << "( "; 
+        procNode = pt->getOneChild(1);
         arguList = pt->getOneChild(0)->getChild();
+        
+        out << "procdure "<< pt->getName() << "( "; 
         for( int i=0; i<arguList.size(); i++ )
             cout << arguList[i]->getName() << " ";
         cout << ")" << endl;
-        printProcTree( pt->getOneChild(1),"\t" );
+
+        printProcTree( procNode, "\t" );
         break;
+
 
     case CAR:
             
