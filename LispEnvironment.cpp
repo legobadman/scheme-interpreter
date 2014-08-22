@@ -34,6 +34,12 @@ p_AstNode LispEnvironment::getSymbol( string idName )
     return p;
 }
 
+bool LispEnvironment::isSymbolInCurrentStack( string idName )
+{
+    vector<SymbolTable>::reverse_iterator it = prisoner->runTimeStack.rbegin();
+    return (*it).getSymbol( idName );
+}
+
 void LispEnvironment::InsertID( string idName, p_AstNode defNode )
 {
     vector<SymbolTable>::reverse_iterator it;
