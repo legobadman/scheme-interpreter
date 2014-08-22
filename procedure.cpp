@@ -95,7 +95,7 @@ p_AstNode interpreter( p_AstNode root )
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
 
     p_AstNode   result, temp;
-    p_AstNode   childNode, consNode;
+    p_AstNode   childNode, consNode, assigned;
     vector<p_AstNode> valueList;
 
     switch( root->getTokenType() )
@@ -132,9 +132,9 @@ p_AstNode interpreter( p_AstNode root )
             result = divide( childList );
         }
 
-        for(int i=0; i<childList.size(); i++ )
-            delete childList[i];
-        childList.clear();
+        for(int i=0; i<root->getChild().size(); i++ )
+            delete root->getOneChild( i );
+        root->getChild().clear();
 
         break;
 
@@ -163,13 +163,14 @@ p_AstNode interpreter( p_AstNode root )
         break;
     
     case PROC:
-        result = callProcedure( rootName, childList );
+        assigned = callProcedure( rootName, childList );
         //printProcTree( result, "\t" );
 
-        result = interpreter( result );
+        result = interpreter( assigned );
         break;
 
     case ARGUMENT:
+        result = root;
         break;
 
     case CONS:
@@ -215,13 +216,15 @@ p_AstNode interpreter( p_AstNode root )
         /* reguard any positive as true symbol */
         temp = interpreter( root->getOneChild(0) );
         if( temp->getNumber() > 0 )
-        {
             result = interpreter(root->getOneChild(1)); 
-        }
         else
-        {
             result = interpreter(root->getOneChild(2));
-        }
+        break;
+
+    case LAMBDA:
+        result = root;
+    break;
+
     }
 
     return result;
@@ -441,7 +444,7 @@ p_AstNode assignArgument(
 
     if( type == ARGUMENT )
     {
-        newNode = formal_to_actual[ root->getName() ];
+        newNode = deepCopy (formal_to_actual[ root->getName() ]);
     }
     else if( type == NUM )
     {
@@ -470,3 +473,64 @@ p_AstNode assignArgument(
 
     return newNode;
 }
+
+
+p_AstNode substitudeArgument( p_AstNode lambNode, vector<p_AstNode> valueList )
+{
+    p_AstNode formalArguNode;
+    p_AstNode funcBody;
+
+    formalArguNode = lambNode->getOneChild(0);
+    funcBody = lambNode->getOneChild(1);
+
+    map<string, p_AstNode> formal_to_actual;
+
+    vector<p_AstNode> child = formalArguNode->getChild();
+    for( int i=0; i<child.size(); i++ )
+        formal_to_actual[ child[i]->getName() ] = valueList[i];
+    
+    p_AstNode parsedTree = assignArgument( funcBody, formal_to_actual );
+    
+    return parsedTree;
+}
+
+
+
+
+/* 
+for example:
+    (define (f x y)
+        (define (abs x) ....)
+        (+ (abs x) (abs y)))
+    
+    to 
+
+    (define (f x y)
+        (define (abs x) .... )
+        (+ (if (> x 0) x (* -1 x)) (if (> y 0) y (* -1 y)))
+
+p_AstNode callTemperoryProcedure( p_AstNode root )
+{
+    TokenType   tokenType;
+    LispEnvironment env = LispEnvironment::getRunTimeEnv();
+
+    TokenType   nodeType = root->getTokenType();
+    string      name = root->getName();
+
+    vector<p_AstNode> child;
+
+    child = root->getChild();
+
+    if( nodeType!=ARGUMENT && env.isSymbolInCurrentStack( name ) )
+    {
+        root = callProcedure( name, child );
+    }
+    
+    for( int i=0; i<child.size(); i++ )
+    {
+        root->setOneChild( i, callTemperoryProcedure (child[i]) );
+    }
+    
+    return root;
+}
+*/
