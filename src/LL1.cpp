@@ -533,7 +533,7 @@ p_AstNode LL1_DEF()
         defineNode = new ASTNode( PROC, objName );
         defineNode->addChild( defobj );
         defineNode->addChild( defbody );
-        env.runTimeStackPop();
+    //    env.runTimeStackPop();
     }
     else
     {
