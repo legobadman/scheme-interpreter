@@ -1,4 +1,4 @@
-VPATH=src
+VPATH = src
 
 objects=\
 	LL1.o Number.o scan.o AST.o Fraction.o\
@@ -24,8 +24,9 @@ AST.o: Tree.h LL1.h Token.h Number.h AST.cpp tokenType.h
 Fraction.o: Fraction.h Fraction.cpp
 #	g++ -g -c Fraction.h Fraction.cpp
 
+
 lex.yy.o: Token.h lex.yy.c
-#	g++ -g -c Token.h lex.yy.c
+	g++ -g -c src/Token.h src/lex.yy.c
 
 procedure.o: procedure.cpp procedure.h Tree.h LL1.h LispEnvironment.h
 #	g++ -g -c procedure.cpp procedure.h Tree.h LL1.h LispEnvironment.h
