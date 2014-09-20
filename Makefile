@@ -5,8 +5,8 @@ objects=\
 	lex.yy.o procedure.o LispEnvironment.o\
 	SymbolTable.o
 
-lu-scheme: $(objects)
-	g++ -g $(objects) -o lu-scheme
+scheme-interpreter: $(objects)
+	g++ -g $(objects) -o scheme-interpreter
 	rm $(objects)
 
 LL1.o: LL1.h LL1.cpp Tree.h Token.h tokenType.h LispEnvironment.h procedure.h
