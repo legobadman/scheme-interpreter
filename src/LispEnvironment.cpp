@@ -40,13 +40,6 @@ bool LispEnvironment::isSymbolInCurrentStack( string idName )
     return (*it).getSymbol( idName );
 }
 
-void LispEnvironment::InsertID( string idName, p_AstNode defNode )
-{
-    vector<SymbolTable>::reverse_iterator it;
-    it = prisoner->runTimeStack.rbegin();
-        
-    (*it).insertID( idName, defNode );
-}
 
 
 void LispEnvironment::runTimeStackPush()
@@ -77,5 +70,44 @@ void LispEnvironment::DeleteID( string idName )
     (*it).deleteID( idName );
 }
 
+
+void LispEnvironment::InsertID( string idName, p_AstNode defNode )
+{
+    vector<SymbolTable>::reverse_iterator it;
+    it = prisoner->runTimeStack.rbegin();
+        
+    (*it).insertID( idName, defNode );
+}
+
+
+void LispEnvironment::InsertMacro (string name, Macro m)
+{
+    vector<SymbolTable>::reverse_iterator it;
+    it = prisoner->runTimeStack.rbegin();
+
+    (*it).insertMacro (name, m);
+}
+
+Macro LispEnvironment::SearchMacro (string name)
+{
+    vector<SymbolTable>::reverse_iterator it = prisoner->runTimeStack.rbegin();
+    
+    Macro m;
+    for( ; it != prisoner->runTimeStack.rend(); it++ )
+    {
+        m = (*it).searchMacro(name);
+        if (!m.isEmpty())
+            break;
+    }
+    return m;
+}
+
+void LispEnvironment::DeleteMacro (string name)
+{
+    vector<SymbolTable>::reverse_iterator it;
+    it = prisoner->runTimeStack.rbegin();
+    
+    (*it).deleteMacro (name);
+}
 
 

@@ -2,45 +2,49 @@
 #define _LL1_H_
 
 #include "Tree.h"
-
-p_AstNode LL1_Lisp();
-
-p_AstNode LL1_exp();
+#include "Token.h"
+#include "macro.h"
 
 
-p_AstNode LL1_Value();
+extern p_AstNode LL1_Lisp (vector<Token>, int &);
 
-p_AstNode LL1_procedure();
+extern p_AstNode LL1_exp (vector<Token>, int &);
 
-p_AstNode LL1_Operator();
+extern p_AstNode LL1_Value (vector<Token>, int &);
 
-p_AstNode LL1_Rop();
-p_AstNode LL1_Boolop();
+extern p_AstNode LL1_procedure (vector<Token>, int &);
 
-p_AstNode LL1_IF();
-p_AstNode LL1_COND();
-p_AstNode LL1_ConditionList();
+extern p_AstNode LL1_Operator (vector<Token>, int &);
 
-p_AstNode LL1_LET();
+extern p_AstNode LL1_Rop (vector<Token>, int &);
 
-p_AstNode LL1_LAMB();
+extern p_AstNode LL1_Boolop (vector<Token>, int &);
 
-std::vector<p_AstNode> LL1_exp_();
+extern p_AstNode LL1_IF (vector<Token>, int &);
 
-std::vector<p_AstNode> LL1_ArguRefList();
+extern p_AstNode LL1_COND (vector<Token>, int &);
+
+extern p_AstNode LL1_ConditionList (vector<Token>, int &);
+
+extern p_AstNode LL1_LET (vector<Token>, int &);
+
+extern p_AstNode LL1_LAMB (vector<Token>, int &);
+
+extern std::vector<p_AstNode> LL1_exp_ (vector<Token>, int &);
+
+extern std::vector<p_AstNode> LL1_ArguRefList (vector<Token>, int &);
 
 
-p_AstNode LL1_DEF();
+extern p_AstNode LL1_DEF (vector<Token>, int &);
 
-p_AstNode LL1_DEFOBJ();
+extern p_AstNode LL1_DEFOBJ (vector<Token>, int &);
 
-p_AstNode LL1_DEFBODY();
+extern std::string LL1_DEFBODY (Macro&, vector<Token>, int &);
 
+extern p_AstNode LL1_CONS (vector<Token>, int &);
+extern p_AstNode LL1_CAR (vector<Token>, int &);
+extern p_AstNode LL1_CDR (vector<Token>, int &);
 
-p_AstNode LL1_CONS();
-p_AstNode LL1_CAR();
-p_AstNode LL1_CDR();
-
-p_AstNode LL1_LIST();
+extern p_AstNode LL1_LIST(vector<Token>, int &);
 
 #endif

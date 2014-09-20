@@ -324,7 +324,6 @@ int RecognizeAndAct_for_str( const char* text )
     return 0;
 }
 
-
 void set_functions_for_allfunctions( )
 {
     ptr[0] = Recognize_for_ID;

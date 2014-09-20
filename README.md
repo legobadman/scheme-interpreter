@@ -16,7 +16,7 @@ scheme-interpreter
     3
 
     \>\>\>  (define (fac n)  
-<p>             (if (= n 1) 1</p>
+<h5>             (if (= n 1) 1</h5>
           (* n (fac (- n 1)))))  
 
     \>\>\>  (fac 10)  

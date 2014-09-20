@@ -24,6 +24,6 @@ lex.yy.o: Token.h lex.yy.c
 
 procedure.o: procedure.cpp procedure.h Tree.h LL1.h LispEnvironment.h
     
-LispEnvironment.o: SymbolTable.h LispEnvironment.cpp LispEnvironment.h procedure.h
+LispEnvironment.o: SymbolTable.h LispEnvironment.cpp LispEnvironment.h procedure.h macro.h
 
-SymbolTable.o: SymbolTable.h SymbolTable.cpp Tree.h
+SymbolTable.o: SymbolTable.h SymbolTable.cpp Tree.h macro.h

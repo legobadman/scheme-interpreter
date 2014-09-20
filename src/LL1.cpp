@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <map>
+#include <list>
 #include "LL1.h"
 #include "LispEnvironment.h"
 #include <stdlib.h>
@@ -14,19 +15,17 @@ using namespace std;
 
 
 string getSourceCodeFromStream( istream &in );
-void getTokenStream( vector<Token> &Q, string sourceCode );
+void getTokenStream (vector<Token> &Q, string sourceCode );
+void constructTokenStream (vector<Token> &Q, list<string> codelist);
 void outputtest( vector<Token> &Q );
 
 
-p_AstNode CalculateAST( p_AstNode );
-
-vector<Token> TokenStream;
-int currentIndex = 0;
+p_AstNode CalculateAST (p_AstNode);
 
 
 /* the main SymbolTable for the running stack */
 
-void match( TokenType type )
+void match (TokenType type, vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
     if ( token.getTokenType() == type )
@@ -39,13 +38,12 @@ void match( TokenType type )
         cout << "Not match " << token.getStrval() << endl;
         exit(0);
     }
-
 }
 
-void match( string s )
+void match (string s, vector<Token>TokenStream, int &currentIndex)
 { 
     Token token = TokenStream[currentIndex];
-    if ( token.getStrval() == s )
+    if (token.getStrval() == s)
     {
         currentIndex++;
         //cout << "match " << token.getStrval() << endl;
@@ -58,31 +56,71 @@ void match( string s )
 
 }
 
+string contentInBracket (vector<Token>TokenStream, int &currentIndex)
+{
+    int leftBracket(0), rightBracket(0);
+    string content, token_str;
+    content += "(";
+    leftBracket++;
+    currentIndex++;
+    while (leftBracket != rightBracket)
+    {
+         token_str = TokenStream[currentIndex].getStrval();
+         if (token_str == "(") leftBracket++;
+         if (token_str == ")") rightBracket++;
+         content += " " + token_str;
+         currentIndex++;
+    }
+    currentIndex--;
+    return content;
+
+}
+
 void error( string s )
 {
     cerr<<"error happened in "<<s<<endl;
 }
 
-p_AstNode LL1_Lisp()
+
+p_AstNode eval (vector<Token>TokenStream, int currentIndex)
+{
+    p_AstNode p, result;
+    p = LL1_Lisp (TokenStream, currentIndex);
+    if (p)
+    {
+        result = interpreter(p);
+        return result;
+    }
+    else
+        return NULL;
+}
+
+
+p_AstNode LL1_Lisp (vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
-    Token nextToken = TokenStream[currentIndex+1]; 
     
     p_AstNode root;
-    if( token.getStrval() == "(" )
+    if (token.getStrval() == "(")
     {
-        if( nextToken.getStrval() == "define" )
-            root = LL1_DEF();
+        Token nextToken = TokenStream[currentIndex+1]; 
+        if (nextToken.getStrval() == "define")
+        {
+            LL1_DEF (TokenStream, currentIndex);
+            return NULL;
+        }
         else
-            root = LL1_exp();
+            root = LL1_exp (TokenStream, currentIndex);
+    }
+    else
+    {
+        root = LL1_exp (TokenStream, currentIndex);
     }
     // 现在已经得到一棵语法树，是时候要对语法树进行解析了。
-    
-
     return root;
 }
 
-p_AstNode LL1_exp()
+p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
     string str = token.getStrval();
@@ -95,63 +133,77 @@ p_AstNode LL1_exp()
 
     if ( token.getStrval() == "(" )
     {
-        match("(");
+        match ("(", TokenStream, currentIndex);
         /* special procedure */
         token = TokenStream[currentIndex];
         str = token.getStrval();
+
         if ( str == "cond" )
-            expNode = LL1_COND();
+            expNode = LL1_COND(TokenStream, currentIndex);
         else if ( str == "if" )
         {
-            expNode = LL1_IF();
+            expNode = LL1_IF(TokenStream, currentIndex);
         }
         else if (str == "let")
         {
-            LL1_LET();
+            LL1_LET(TokenStream, currentIndex);
         }
         else if (str == "cons")
         {
-            expNode = LL1_CONS();
+            expNode = LL1_CONS(TokenStream, currentIndex);
         }
         else if (str == "car")
         {
-            expNode = LL1_CAR();
+            expNode = LL1_CAR(TokenStream, currentIndex);
         }
         else if (str == "cdr")
         {
-            expNode = LL1_CDR(); 
+            expNode = LL1_CDR(TokenStream, currentIndex); 
         }
         else if (str == "list")
         {
-            expNode = LL1_LIST();
+            expNode = LL1_LIST(TokenStream, currentIndex);
         }
-
         else if (str == "lambda")
         {
-            expNode = LL1_LAMB();
+            expNode = LL1_LAMB(TokenStream, currentIndex);
         }
-
         else
         {
-            p_AstNode procNode = LL1_procedure();
-            vector<p_AstNode> valueList = LL1_exp_();
+            p_AstNode procNode = LL1_procedure(TokenStream, currentIndex);
+            vector<p_AstNode> valueList = LL1_exp_(TokenStream, currentIndex);
+
+            // eval(code);
 
             if (procNode->getTokenType() == LAMBDA)
             {
-                expNode = substitudeArgument( procNode, valueList );
+                expNode = substitudeArgument (procNode, valueList);
             }
             else
             {
-                procNode -> setChild( valueList );
+                procNode -> setChild (valueList);
                 expNode = procNode;
             }
+
+            Macro   macro = env.SearchMacro(expNode->getName());
+            //macro.outputtest();
+            if (!macro.isEmpty())
+            {
+                string  code = macro.macro_span(procNode);
+
+                vector<Token> Q;
+                getTokenStream (Q, code );
+
+                expNode = eval(Q,0);
+            }
+
         }
-        match(")");
+        match(")", TokenStream, currentIndex);
     }
     else if (token.getStrval()=="\"" || 
             token.getTokenType()==NUM || token.getTokenType()==ID )
     {
-        expNode = LL1_Value();
+        expNode = LL1_Value(TokenStream, currentIndex);
     }
     else
     {
@@ -160,7 +212,7 @@ p_AstNode LL1_exp()
     return expNode;
 }
 
-p_AstNode LL1_Value()
+p_AstNode LL1_Value(vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
     
@@ -173,13 +225,31 @@ p_AstNode LL1_Value()
 
     if ( token_string == "\"" )
     {
-        match("\"");
+        match("\"", TokenStream, currentIndex);
 
     }
-    else if ( token_type == ID )
+    else if (token_type == ID)
     {
-        match( ID );
-    
+        match (ID, TokenStream, currentIndex);
+        Macro macro = env.SearchMacro(token_string);
+        
+        if (!macro.isEmpty() && !macro.is_Procedure_Macro())
+        {
+                //macro.outputtest();
+            string  code = macro.macro_span();
+
+            vector<Token> Q;
+            getTokenStream (Q, code );
+
+            returnNode = eval(Q,0);
+        }
+        else
+        {
+            returnNode = new ASTNode (ID, token_string);
+            return returnNode;
+        }
+
+        /*
         p_AstNode searchNode = env.getSymbol( token_string );
         if (searchNode -> getTokenType() == NUM)
         {
@@ -189,7 +259,6 @@ p_AstNode LL1_Value()
         {
             returnNode = deepCopy (searchNode);
         }
-        /*
         returnNode = deepCopy( searchNode );    
         if( !returnNode )
         {
@@ -201,8 +270,8 @@ p_AstNode LL1_Value()
 
     else if ( token_type == NUM )
     {
-        returnNode = new ASTNode( NUM, token_string );
-        match( NUM );
+        returnNode = new ASTNode (NUM, token_string);
+        match (NUM , TokenStream, currentIndex);
     }
     else if ( token_type == ARGUMENT )
     {
@@ -215,7 +284,7 @@ p_AstNode LL1_Value()
 
 }
 
-p_AstNode LL1_procedure()
+p_AstNode LL1_procedure(vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
 
@@ -224,25 +293,25 @@ p_AstNode LL1_procedure()
     p_AstNode   procNode;
 
     if ( str=="+" || str=="-" || str=="*" || str=="/" )
-        procNode = LL1_Operator();
+        procNode = LL1_Operator(TokenStream, currentIndex);
 
     else if ( str=="<" || str=="<=" || str==">" || str==">=" || str=="=" )
-        procNode = LL1_Rop();
+        procNode = LL1_Rop(TokenStream, currentIndex);
 
     else if ( str=="and" || str=="or" || str=="not" )
-        procNode = LL1_Boolop();
+        procNode = LL1_Boolop(TokenStream, currentIndex);
 
     //else if (str == "lambda")
     //    procNode = LL1_LAMB();
 
     else if ( str=="(" )
     {
-        procNode = LL1_exp();
+        procNode = LL1_exp(TokenStream, currentIndex);
     }
 
     else if ( token.getTokenType() ==ID )
     {
-        match(ID);
+        match(ID, TokenStream, currentIndex);
         procNode = new ASTNode( PROC, token.getStrval() );
     }
 
@@ -252,7 +321,7 @@ p_AstNode LL1_procedure()
     return procNode;
 }
 
-p_AstNode LL1_Operator()
+p_AstNode LL1_Operator(vector<Token>TokenStream, int &currentIndex)
 {
     Token   token = TokenStream[currentIndex];
     string str = token.getStrval();
@@ -260,19 +329,19 @@ p_AstNode LL1_Operator()
 
     if ( str == "+" )
     {
-        match("+");
+        match("+", TokenStream, currentIndex);
     }
     else if ( str == "-" )
     {
-        match("-");
+        match("-", TokenStream, currentIndex);
     }
     else if ( str == "*" )
     {
-        match("*");
+        match("*", TokenStream, currentIndex);
     }
     else if ( str == "/" )
     {
-        match("/");
+        match("/", TokenStream, currentIndex);
     }
     else
     {
@@ -282,7 +351,7 @@ p_AstNode LL1_Operator()
 
 }
 
-p_AstNode LL1_Rop()
+p_AstNode LL1_Rop(vector<Token>TokenStream, int &currentIndex)
 {
     Token   token = TokenStream[currentIndex];
     string str = TokenStream[currentIndex].getStrval();
@@ -290,23 +359,23 @@ p_AstNode LL1_Rop()
     p_AstNode newnode = new ASTNode( BOOL_OP, str );
     if ( str == "<" )
     {
-        match("<");
+        match("<", TokenStream, currentIndex);
     }
     else if ( str == "<=" )
     {
-        match("<=");
+        match("<=", TokenStream, currentIndex);
     }
     else if ( str == ">" )
     {
-        match(">");
+        match(">", TokenStream, currentIndex);
     }
     else if ( str == ">=" )
     {
-        match(">=");
+        match(">=", TokenStream, currentIndex);
     }
     else if ( str=="=" )
     {
-        match("=");
+        match("=", TokenStream, currentIndex);
     }
     else
     {
@@ -315,7 +384,7 @@ p_AstNode LL1_Rop()
     return newnode;
 }
 
-p_AstNode LL1_Boolop()
+p_AstNode LL1_Boolop(vector<Token>TokenStream, int &currentIndex)
 {
     Token   token = TokenStream[currentIndex];
     string str = TokenStream[currentIndex].getStrval();
@@ -325,15 +394,15 @@ p_AstNode LL1_Boolop()
 
     if ( str == "and" )
     {
-        match("and");
+        match("and", TokenStream, currentIndex);
     }
     else if ( str == "or" )
     {
-        match("or");
+        match("or", TokenStream, currentIndex);
     }
     else if ( str == "not" )
     {
-        match("not");
+        match("not", TokenStream, currentIndex);
     }
     else
     {
@@ -354,18 +423,17 @@ p_AstNode LL1_Boolop()
 
  */
 
-
-p_AstNode LL1_LAMB()
+p_AstNode LL1_LAMB(vector<Token>TokenStream, int &currentIndex)
 {
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
-    match( "lambda" );
-    match( "(" );
+    match ("lambda", TokenStream, currentIndex);
+    match ("(", TokenStream, currentIndex);
 
     /* generate a formal argument node */
     p_AstNode formalArguNode = new ASTNode("lambda");
     
-    vector<p_AstNode> arguments = LL1_ArguRefList();
-    match( ")" );
+    vector<p_AstNode> arguments = LL1_ArguRefList(TokenStream, currentIndex);
+    match (")", TokenStream, currentIndex );
     
     formalArguNode -> setChild( arguments );
 
@@ -378,7 +446,7 @@ p_AstNode LL1_LAMB()
     }
 
     /* function body */
-    p_AstNode bodyNode = LL1_exp();
+    p_AstNode bodyNode = LL1_exp(TokenStream, currentIndex);
 
     env.runTimeStackPop();
     env.TurnOnCalculation();
@@ -395,7 +463,7 @@ p_AstNode LL1_LAMB()
 }
 
 /* 返回引用还是值返回? */
-vector<p_AstNode> LL1_exp_()
+vector<p_AstNode> LL1_exp_(vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
 
@@ -404,8 +472,8 @@ vector<p_AstNode> LL1_exp_()
     if ( token.getStrval()=="(" || token.getStrval()=="\"" || 
             token.getTokenType()==ID || token.getTokenType()==NUM )
     {
-        p_AstNode newnode = LL1_exp();
-        valueList = LL1_exp_();
+        p_AstNode newnode = LL1_exp(TokenStream, currentIndex);
+        valueList = LL1_exp_(TokenStream, currentIndex);
         valueList.insert( valueList.begin(), newnode );
     }
     else if ( token.getStrval()==")" )
@@ -417,7 +485,7 @@ vector<p_AstNode> LL1_exp_()
 }
 
 /* the function try to match (<p1> <e1>) (<p2> <e2>) ... */
-p_AstNode LL1_ConditionList()
+p_AstNode LL1_ConditionList(vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
 
@@ -429,17 +497,17 @@ p_AstNode LL1_ConditionList()
     }
     else if ( token.getStrval() == "(" )
     {
-        match("(");
+        match("(", TokenStream, currentIndex);
         token = TokenStream[currentIndex];
         if ( token.getStrval() == "(" )
         {
             /* predicate */
-            p_AstNode boolvalue = LL1_exp();
+            p_AstNode boolvalue = LL1_exp(TokenStream, currentIndex);
             /* expression */
-            p_AstNode curr_result = LL1_exp();
-            match(")");
+            p_AstNode curr_result = LL1_exp(TokenStream, currentIndex);
+            match(")", TokenStream, currentIndex);
 
-            p_AstNode next_result = LL1_ConditionList();
+            p_AstNode next_result = LL1_ConditionList(TokenStream, currentIndex);
 
             if( boolvalue->getNumber() == 1 )
             {
@@ -452,10 +520,10 @@ p_AstNode LL1_ConditionList()
         }
         else if( token.getStrval() == "else" )
         {
-            match("else");
+            match("else", TokenStream, currentIndex);
             /* expression */
-            finalResult = LL1_exp();
-            match(")");
+            finalResult = LL1_exp(TokenStream, currentIndex);
+            match(")", TokenStream, currentIndex);
         }
         else
         {
@@ -469,7 +537,7 @@ p_AstNode LL1_ConditionList()
     return finalResult;
 }
 
-vector<p_AstNode> LL1_ArguRefList()
+vector<p_AstNode> LL1_ArguRefList(vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
     
@@ -477,10 +545,10 @@ vector<p_AstNode> LL1_ArguRefList()
 
     if ( token.getTokenType() == ID )
     {
-        match( ID );
+        match( ID, TokenStream, currentIndex );
         p_AstNode argument = new ASTNode( ARGUMENT, token.getStrval() );
 
-        valueList = LL1_ArguRefList();
+        valueList = LL1_ArguRefList(TokenStream, currentIndex);
 
         valueList.insert( valueList.begin(), argument );
     }
@@ -496,73 +564,38 @@ vector<p_AstNode> LL1_ArguRefList()
 
 /* DEF -> ( define DEFOBJ DEFBODY )
  */
-p_AstNode LL1_DEF()
+p_AstNode LL1_DEF(vector<Token>TokenStream, int &currentIndex)
 {
-    match("(");    
-    match("define");
+    match("(", TokenStream, currentIndex);    
+    match("define", TokenStream, currentIndex);
     
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
 
-    env.TurnOffCalculation();
-
-
-    p_AstNode defineNode;
-
-    p_AstNode defobj = LL1_DEFOBJ();
+    p_AstNode defobj = LL1_DEFOBJ(TokenStream, currentIndex);
     string objName = defobj->getName();
+    Macro macro = Macro(objName);
 
     vector<p_AstNode> arguments = defobj->getChild();
-    /* 如有参数，开辟新的栈空间进行压栈　*/
-    if( arguments.size()>0 )
+    if (arguments.size()>0)
     {
-        /* 产生新的符号表,意味着进入新的作用域　*/
-        env.runTimeStackPush();
-        env.pushArgumentInStack( arguments );
-        env.TurnOffCalculation();
-    }
-    else
-    {
-        env.TurnOnCalculation();
+        macro.put_arguments (arguments);
+        macro.set_Procedure_Macro();
     }
 
-    p_AstNode defbody = LL1_DEFBODY();
+    LL1_DEFBODY (macro, TokenStream, currentIndex);
 
-    /* if there are arguments generated, means that there is a stack */
-    if( arguments.size()>0 )
+    if (!env.SearchMacro(objName).isEmpty())
     {
-        defineNode = new ASTNode( PROC, objName );
-        defineNode->addChild( defobj );
-        defineNode->addChild( defbody );
-    //    env.runTimeStackPop();
+        env.DeleteMacro(objName);
     }
-    else
-    {
-        defineNode = defbody;
-    }
+    env.InsertMacro (objName, macro);
 
-    /* store the id in the symbol table
-     * if the proc with the same name exists, 
-     * overlab this old proc
-     */
-
-    p_AstNode p = env.getSymbol( objName );
-    if( p!=NULL )
-    {
-        env.DeleteID( objName );    
-    }
-
-    env.InsertID( objName, defineNode );
-
-    match(")");
-    
-    env.TurnOffCalculation();
-
-    return defineNode;
+    match (")", TokenStream, currentIndex);
 }
 
 /* DEFOBJ -> ID | ( ID Argulist )
  */
-p_AstNode LL1_DEFOBJ()
+p_AstNode LL1_DEFOBJ(vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
     
@@ -573,28 +606,28 @@ p_AstNode LL1_DEFOBJ()
     /* define symbol */
     if ( token.getTokenType() == ID )
     {
-        match( ID );
+        match( ID, TokenStream, currentIndex );
         defobj = new ASTNode( ID, token.getStrval() );
     }
     /* define procedure */
     else if ( token.getStrval() == "(" )
     {
-        match( "(" );
+        match( "(", TokenStream, currentIndex );
         
         token = TokenStream[ currentIndex ];
         
-        match( ID );
+        match( ID, TokenStream, currentIndex );
         
         /* Using enum PROC for the user-defined procedure */
         defobj = new ASTNode( PROC, token.getStrval() );
 
         vector<p_AstNode> arguList;
-        arguList = LL1_ArguRefList();
+        arguList = LL1_ArguRefList(TokenStream, currentIndex);
 
         defobj->setChild( arguList );
 
 
-        match( ")" );
+        match( ")", TokenStream, currentIndex );
     }
     else
         error("LL1_DEFOBJ()");
@@ -602,10 +635,57 @@ p_AstNode LL1_DEFOBJ()
     return defobj;
 }
 
+string LL1_DEFBODY (Macro &macro, vector<Token>TokenStream, int &currentIndex)
+{
+    Token token = TokenStream[currentIndex];
 
-/* DEFOBJ -> ID | ( ID Argulist )
- */
-p_AstNode LL1_DEFBODY()
+    LispEnvironment env = LispEnvironment::getRunTimeEnv();
+
+    string      ts = token.getStrval();
+    TokenType   tt = token.getTokenType();
+
+    if (ts == "(" )
+    {
+        Token next_token = TokenStream[ currentIndex + 1 ];
+        if ( next_token.getStrval() == "define" )
+        {
+            string def;
+            while (ts=="(" && next_token.getStrval()=="define")
+            {
+                def = contentInBracket (TokenStream, currentIndex);
+                macro.put_preprocessing (def);
+            }
+            token = TokenStream[currentIndex];
+            ts = token.getStrval ();
+            next_token = TokenStream[currentIndex+1];
+        }
+        else
+        {
+            string content;
+            content = contentInBracket (TokenStream, currentIndex);
+            macro.set_content(content);
+            return content;
+        }
+    }
+
+    else if (tt==ID || tt==NUM)
+    {
+        string content;
+        while ( (ts=TokenStream[currentIndex].getStrval()) != ")")
+        {
+             content += ts;
+             currentIndex++;
+        }
+        macro.set_content(content);
+        return content;
+    }
+    else
+        error("LL1_DEFBODY()");
+
+}
+
+/*
+p_AstNode LL1_DEFBODY(vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
 
@@ -621,31 +701,14 @@ p_AstNode LL1_DEFBODY()
         Token next_token = TokenStream[ currentIndex + 1 ];
         if ( next_token.getStrval() == "define" )
         {
-            LL1_DEF();
-            defbody = LL1_DEFBODY();
+            LL1_DEF(TokenStream, currentIndex);
+            defbody = LL1_DEFBODY(TokenStream, currentIndex);
         }
         else
         {
-            /* notice that when the instant calculation turned off
-             * LL1_exp() will not calculate the expression but construct
-             * a parsed tree for this expression. 
-             * for example,   (+ a 1)
-             * LL1_exp() return such a parsed tree:
-             
-             *    +
-             *   / \
-             *  a   1
-             */
-
-            /* maybe it's a number, or a tree with some arguments */
-            calcModel = LL1_exp();
+            calcModel = LL1_exp(TokenStream, currentIndex);
             
-            //calcModel = callTemperoryProcedure( calcModel );
-
-            /* the following recursion will overlab the previous tree
-             */
-
-            followingModel = LL1_DEFBODY();
+            followingModel = LL1_DEFBODY(TokenStream, currentIndex);
             if( !followingModel )
                 defbody = calcModel;
             else
@@ -666,23 +729,24 @@ p_AstNode LL1_DEFBODY()
     return defbody;    
 
 }
+*/
 
-p_AstNode LL1_IF()
+p_AstNode LL1_IF(vector<Token>TokenStream, int &currentIndex)
 {
     /* the '(' before if has been matched in LL1_exp() */
     p_AstNode ifTree, bopNode, thenNode, elseNode;
 
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
 
-    match("if");
+    match("if", TokenStream, currentIndex);
     ifTree = new ASTNode( IF, "if" );
     
     // judgement
-    bopNode = LL1_exp();
+    bopNode = LL1_exp(TokenStream, currentIndex);
         // then-part
-    thenNode = LL1_exp();
+    thenNode = LL1_exp(TokenStream, currentIndex);
         // else-part
-    elseNode = LL1_exp();
+    elseNode = LL1_exp(TokenStream, currentIndex);
 
     // the children of iftree in order is bopNode, thenNode, elseNode
     ifTree->addChild( bopNode );
@@ -692,13 +756,13 @@ p_AstNode LL1_IF()
     return ifTree;
 }
 
-p_AstNode LL1_COND()
+p_AstNode LL1_COND(vector<Token>TokenStream, int &currentIndex)
 {
-    match("cond");
-    return LL1_ConditionList();
+    match ("cond", TokenStream, currentIndex);
+    return LL1_ConditionList (TokenStream, currentIndex);
 }
 
-p_AstNode LocalVariablePairs()
+p_AstNode LocalVariablePairs(vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
     if ( token.getStrval() == ")" )
@@ -707,30 +771,30 @@ p_AstNode LocalVariablePairs()
     }
     else
     {
-        match("(");
+        match ("(", TokenStream, currentIndex);
         //locally defined variable
-        LL1_exp();
+        LL1_exp (TokenStream, currentIndex);
         // value to the previous defined variable
-        LL1_exp();
-        match(")");
-        LocalVariablePairs();
+        LL1_exp (TokenStream, currentIndex);
+        match (")", TokenStream, currentIndex);
+        LocalVariablePairs(TokenStream, currentIndex);
     }
 
 }
 
-p_AstNode LL1_LET()
+p_AstNode LL1_LET(vector<Token>TokenStream, int &currentIndex)
 {
-    match("let");
-    match("(");
+    match ("let", TokenStream, currentIndex);
+    match ("(", TokenStream, currentIndex);
 
-    LocalVariablePairs();
+    LocalVariablePairs (TokenStream, currentIndex);
 
-    match(")");
+    match (")", TokenStream, currentIndex);
 
-    LL1_exp();
+    LL1_exp (TokenStream, currentIndex);
 }
 
-static vector<p_AstNode> VariableList()
+static vector<p_AstNode> VariableList (vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
     vector<p_AstNode> valueList;
@@ -742,24 +806,24 @@ static vector<p_AstNode> VariableList()
     }
     else
     {
-        p_AstNode newnode = LL1_exp();
-        valueList = VariableList();
+        p_AstNode newnode = LL1_exp (TokenStream, currentIndex);
+        valueList = VariableList (TokenStream, currentIndex);
         // keep the order
-        valueList.insert( valueList.begin(), newnode );
+        valueList.insert (valueList.begin(), newnode);
     }
 
     return valueList;
 }
 
-p_AstNode LL1_CONS()
+p_AstNode LL1_CONS(vector<Token>TokenStream, int &currentIndex)
 {
-    match("cons");
+    match("cons", TokenStream, currentIndex);
 
-    p_AstNode consTypeNode = new ASTNode( CONS, "cons" );
+    p_AstNode consTypeNode = new ASTNode (CONS, "cons" );
     //left part
-    p_AstNode leftNode = LL1_exp();
+    p_AstNode leftNode = LL1_exp (TokenStream, currentIndex);
     //right part
-    p_AstNode rightNode = LL1_exp();
+    p_AstNode rightNode = LL1_exp (TokenStream, currentIndex);
 
     vector<p_AstNode> child;
     child.push_back( leftNode );
@@ -770,10 +834,10 @@ p_AstNode LL1_CONS()
     return consTypeNode;
 }
 
-p_AstNode LL1_CAR()
+p_AstNode LL1_CAR(vector<Token>TokenStream, int &currentIndex)
 {
-    match("car");
-    p_AstNode consNode = LL1_exp();
+    match ("car", TokenStream, currentIndex);
+    p_AstNode consNode = LL1_exp (TokenStream, currentIndex);
         
     p_AstNode carNode = new ASTNode(CAR,"car");
     carNode->addChild( consNode );
@@ -781,25 +845,25 @@ p_AstNode LL1_CAR()
     return carNode;    
 }
 
-p_AstNode LL1_CDR()
+p_AstNode LL1_CDR(vector<Token>TokenStream, int &currentIndex)
 { 
-    match("cdr");
-    p_AstNode consNode = LL1_exp();
+    match("cdr", TokenStream, currentIndex);
+    p_AstNode consNode = LL1_exp (TokenStream, currentIndex);
         
     p_AstNode cdrNode = new ASTNode(CDR,"cdr");
-    cdrNode->addChild( consNode );
+    cdrNode->addChild ( consNode );
 
     return cdrNode;    
 
 }
 
-p_AstNode LL1_LIST()
+p_AstNode LL1_LIST (vector<Token>TokenStream, int &currentIndex)
 {
-    match("list");
+    match("list", TokenStream, currentIndex);
     
     p_AstNode listTypeNode = new ASTNode( LIST, "list" );
 
-    listTypeNode -> setChild( VariableList() );
+    listTypeNode -> setChild (VariableList(TokenStream, currentIndex));
 
     return listTypeNode;
 }
@@ -809,34 +873,26 @@ int main()
 {
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
     env.runTimeStackPush();
+    vector<Token> TokenStream;
+    int currentIndex = 0;
+    
 
-    while( true )
+    while (true)
     {
         env.TurnOnCalculation();
 
         string sourceCode = getSourceCodeFromStream( cin ); 
 
-        getTokenStream( TokenStream, sourceCode );
+        getTokenStream (TokenStream, sourceCode);
         
-        p_AstNode p = LL1_Lisp();
-
-        /*
-        cout << "输出符号表：" << endl;
-        env.outputCurrentSymbolTable();
-        cout << endl;
-
-        cout << "语法树: " << endl;
-        printProcTree( p, "\t" );
-        cout << endl;
-        */
-        
-        if( env.isAllowdCalculating() )
+        p_AstNode p = eval (TokenStream, currentIndex);
+        if (p)
         {
-            p_AstNode result = interpreter( p );
-            cout << result << endl;
-            delete result;
+            cout << p << endl;
         }
-        env.TurnOnCalculation();
+
+        TokenStream.clear();
+        currentIndex = 0;
     }
 
     env.runTimeStackPop();

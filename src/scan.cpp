@@ -6,9 +6,10 @@
 
 using namespace std;
  
-extern void set_functions_for_allfunctions();
 extern int (*ptr[ numOfRegex ])( const char* );
 extern int (*ptr_action[ numOfRegex ])( const char *);
+
+void set_functions_for_allfunctions();
 
 void scanByWord( vector<Token> &Q, istream &in )
 {

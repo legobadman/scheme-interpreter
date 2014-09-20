@@ -17,7 +17,8 @@ void printProcTree( p_AstNode, string );
 p_AstNode   deepCopy( const p_AstNode );
 ostream &operator<< ( std::ostream &out, p_AstNode pt);
 
-class ASTNode{
+class ASTNode
+{
 public:
     ASTNode(){}
     ASTNode(const ASTNode& node)
@@ -105,7 +106,7 @@ private:
 
     std::vector<p_AstNode> child;
 
-    /* the name for procedure or number */
+    /* the name of  procedure or real number */
     /* e.g.  "+" "square" "1" ... */
     string name;
 };

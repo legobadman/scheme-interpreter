@@ -6,6 +6,7 @@
 #include <stack>
 #include "Tree.h"
 #include "SymbolTable.h"
+#include "macro.h"
 
 class LispEnvironment
 {
@@ -40,6 +41,10 @@ public:
 
     void InsertID( string idName, p_AstNode defNode );
     void DeleteID( string idName );
+
+    void InsertMacro (string name, Macro m);
+    Macro SearchMacro (string name);
+    void DeleteMacro (string objName);
 
     void outputCurrentSymbolTable();
 
