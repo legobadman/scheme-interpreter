@@ -81,11 +81,12 @@ void error( string s )
     cerr<<"error happened in "<<s<<endl;
 }
 
-
 p_AstNode eval (vector<Token>TokenStream, int currentIndex)
 {
     p_AstNode p, result;
     p = LL1_Lisp (TokenStream, currentIndex);
+//    cout << "宏展开后: "<<endl;
+//    cout << p;
     if (p)
     {
         result = interpreter(p);
@@ -95,11 +96,10 @@ p_AstNode eval (vector<Token>TokenStream, int currentIndex)
         return NULL;
 }
 
-
 p_AstNode LL1_Lisp (vector<Token>TokenStream, int &currentIndex)
 {
     Token token = TokenStream[currentIndex];
-    
+ 
     p_AstNode root;
     if (token.getStrval() == "(")
     {
@@ -114,11 +114,27 @@ p_AstNode LL1_Lisp (vector<Token>TokenStream, int &currentIndex)
     }
     else
     {
+        // TODO:直接输入34, 只出现3
         root = LL1_exp (TokenStream, currentIndex);
     }
-    // 现在已经得到一棵语法树，是时候要对语法树进行解析了。
     return root;
 }
+
+
+/*   
+ *   calculate each expression from inside to outside, for instance:
+ *
+ *   (+ 2 (+ 3 4))   <=>     (+ 2 7)   <=>   9
+ *   
+ *   >>> (define (f x) (+ x 2))
+ *   >>> (f (+ 1 2))
+ *
+ *   first, calculate (+ 1 2), and return 3 as the argument of the macro "f"
+ *   (f 3)
+ *   span the macro like this:    (+ 3 2)
+ */
+
+
 
 p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
 {
@@ -138,6 +154,7 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
         token = TokenStream[currentIndex];
         str = token.getStrval();
 
+        /*
         if ( str == "cond" )
             expNode = LL1_COND(TokenStream, currentIndex);
         else if ( str == "if" )
@@ -154,6 +171,7 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
         }
         else if (str == "car")
         {
+            //TODO: (car (cons (+ 2 3) 3))
             expNode = LL1_CAR(TokenStream, currentIndex);
         }
         else if (str == "cdr")
@@ -170,34 +188,42 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
         }
         else
         {
-            p_AstNode procNode = LL1_procedure(TokenStream, currentIndex);
-            vector<p_AstNode> valueList = LL1_exp_(TokenStream, currentIndex);
+        */
+        p_AstNode procNode = LL1_procedure(TokenStream, currentIndex);
+        vector<p_AstNode> valueList = LL1_exp_(TokenStream, currentIndex);
 
-            // eval(code);
-
-            if (procNode->getTokenType() == LAMBDA)
-            {
-                expNode = substitudeArgument (procNode, valueList);
-            }
-            else
-            {
-                procNode -> setChild (valueList);
-                expNode = procNode;
-            }
-
-            Macro   macro = env.SearchMacro(expNode->getName());
-            //macro.outputtest();
-            if (!macro.isEmpty())
-            {
-                string  code = macro.macro_span(procNode);
-
-                vector<Token> Q;
-                getTokenStream (Q, code );
-
-                expNode = eval(Q,0);
-            }
-
+        // eval(code);
+        if (procNode->getTokenType() == LAMBDA)
+        {
+            p_AstNode realArgu = new ASTNode("");
+            assert(realArgu);
+            realArgu -> setChild(valueList);
+            procNode -> addChild(realArgu);
+            //expNode = substitudeArgument (procNode, valueList);
+            expNode = procNode;
         }
+        else
+        {
+            procNode -> setChild (valueList);
+            expNode = procNode;
+        }
+
+        Macro   macro = env.SearchMacro(expNode->getName());
+        //macro.outputtest();
+        if (!macro.isEmpty())
+        {
+            string  code = macro.macro_span(procNode);
+
+            vector<Token> Q;
+            getTokenStream (Q, code );
+
+            expNode = eval(Q,0);
+        }
+        else
+        {
+            expNode = interpreter(procNode);
+        }
+        //}
         match(")", TokenStream, currentIndex);
     }
     else if (token.getStrval()=="\"" || 
@@ -268,12 +294,12 @@ p_AstNode LL1_Value(vector<Token>TokenStream, int &currentIndex)
         */
     }
 
-    else if ( token_type == NUM )
+    else if (token_type == NUM)
     {
         returnNode = new ASTNode (NUM, token_string);
         match (NUM , TokenStream, currentIndex);
     }
-    else if ( token_type == ARGUMENT )
+    else if (token_type == ARGUMENT)
     {
     }
 
@@ -292,35 +318,32 @@ p_AstNode LL1_procedure(vector<Token>TokenStream, int &currentIndex)
 
     p_AstNode   procNode;
 
-    if ( str=="+" || str=="-" || str=="*" || str=="/" )
-        procNode = LL1_Operator(TokenStream, currentIndex);
-
-    else if ( str=="<" || str=="<=" || str==">" || str==">=" || str=="=" )
-        procNode = LL1_Rop(TokenStream, currentIndex);
-
-    else if ( str=="and" || str=="or" || str=="not" )
-        procNode = LL1_Boolop(TokenStream, currentIndex);
-
-    //else if (str == "lambda")
-    //    procNode = LL1_LAMB();
-
-    else if ( str=="(" )
+    if (str == "(")
     {
         procNode = LL1_exp(TokenStream, currentIndex);
     }
 
-    else if ( token.getTokenType() ==ID )
+    else if (str == "lambda")
     {
-        match(ID, TokenStream, currentIndex);
-        procNode = new ASTNode( PROC, token.getStrval() );
+        procNode = LL1_LAMB(TokenStream, currentIndex);
     }
-
     else
-        error("LL1_procedure()");
+    {
+        match(str, TokenStream, currentIndex);
+
+        map<string, TokenType>::iterator it;
+        it = tokenTypeHash.find(str);
+
+        if (it == tokenTypeHash.end())
+            procNode = new ASTNode (PROC, str);
+        else
+            procNode = new ASTNode (it->second, str);
+    }
 
     return procNode;
 }
 
+/*
 p_AstNode LL1_Operator(vector<Token>TokenStream, int &currentIndex)
 {
     Token   token = TokenStream[currentIndex];
@@ -350,7 +373,9 @@ p_AstNode LL1_Operator(vector<Token>TokenStream, int &currentIndex)
     return newnode;
 
 }
+*/
 
+/*
 p_AstNode LL1_Rop(vector<Token>TokenStream, int &currentIndex)
 {
     Token   token = TokenStream[currentIndex];
@@ -389,7 +414,6 @@ p_AstNode LL1_Boolop(vector<Token>TokenStream, int &currentIndex)
     Token   token = TokenStream[currentIndex];
     string str = TokenStream[currentIndex].getStrval();
 
-    /* 不标注为　bool_op, 暂定为　普通过程　*/
     p_AstNode newnode = new ASTNode( PROC, str );
 
     if ( str == "and" )
@@ -410,19 +434,43 @@ p_AstNode LL1_Boolop(vector<Token>TokenStream, int &currentIndex)
     }
     return newnode;
 }
+*/
 
-/* lambda structure:
+
+/* lambda structure (tree-like):
     
-    LAMB
-        formalArguNode
-            argument1
-            argument2
-            ...
-        body
-            parsedTree
-
+    ______
+   | LAMB |
+　　——————
+      |       ____________
+      -----> | formalArgu |
+      |       ————————————
+      |           |       ___________
+      |           |--->  | argument1 |
+      |           |      |___________|
+      |           |      ___________
+      |           |---> | argument2 |
+      |           | .   |___________|
+      |             .
+      |             
+      |       ______       
+      -----> | body |
+      |       ——————
+      |          |       ____________
+      |          |----> | parsedTree |
+      |                 |____________|
+      |
+      |       __________
+      -----> | realArgu |
+             |__________|
+                 |       ____________
+                 |----> |   argu1    |
+                 |      |____________|
+                 |       ____________
+                 |----> |   argu2    |
+                 |      |____________|
+                    ...
  */
-
 p_AstNode LL1_LAMB(vector<Token>TokenStream, int &currentIndex)
 {
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
@@ -430,34 +478,35 @@ p_AstNode LL1_LAMB(vector<Token>TokenStream, int &currentIndex)
     match ("(", TokenStream, currentIndex);
 
     /* generate a formal argument node */
-    p_AstNode formalArguNode = new ASTNode("lambda");
+    // p_AstNode formalArgu = new ASTNode("lambda");
     
     vector<p_AstNode> arguments = LL1_ArguRefList(TokenStream, currentIndex);
-    match (")", TokenStream, currentIndex );
-    
-    formalArguNode -> setChild( arguments );
 
+    match (")", TokenStream, currentIndex );
+
+    Macro m;
+    m.put_arguments(arguments);
+    
+    string content = contentInBracket(TokenStream, currentIndex);
+    m.set_content(content);
+    //formalArgu -> setChild( arguments );
+
+    /* 
     if( arguments.size()>0 )
     {
-        /* 产生新的符号表,意味着进入新的作用域　*/
         env.runTimeStackPush();
         env.pushArgumentInStack( arguments );
         env.TurnOffCalculation();
     }
+    */
 
-    /* function body */
-    p_AstNode bodyNode = LL1_exp(TokenStream, currentIndex);
+    //p_AstNode bodyNode = LL1_exp(TokenStream, currentIndex);
 
-    env.runTimeStackPop();
-    env.TurnOnCalculation();
-    
-    //match( ")" );
-    
     p_AstNode lambNode = new ASTNode;
-    lambNode -> setTokenType( LAMBDA );
-
-    lambNode -> addChild( formalArguNode );
-    lambNode -> addChild( bodyNode );
+    lambNode -> setTokenType (LAMBDA);
+    lambNode -> setMacro (m);
+    //lambNode -> addChild (formalArgu);
+    //lambNode -> addChild (bodyNode);
 
     return lambNode;
 }
@@ -731,9 +780,9 @@ p_AstNode LL1_DEFBODY(vector<Token>TokenStream, int &currentIndex)
 }
 */
 
+/*
 p_AstNode LL1_IF(vector<Token>TokenStream, int &currentIndex)
 {
-    /* the '(' before if has been matched in LL1_exp() */
     p_AstNode ifTree, bopNode, thenNode, elseNode;
 
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
@@ -755,6 +804,7 @@ p_AstNode LL1_IF(vector<Token>TokenStream, int &currentIndex)
 
     return ifTree;
 }
+*/
 
 p_AstNode LL1_COND(vector<Token>TokenStream, int &currentIndex)
 {
@@ -815,6 +865,8 @@ static vector<p_AstNode> VariableList (vector<Token>TokenStream, int &currentInd
     return valueList;
 }
 
+
+/*
 p_AstNode LL1_CONS(vector<Token>TokenStream, int &currentIndex)
 {
     match("cons", TokenStream, currentIndex);
@@ -867,7 +919,7 @@ p_AstNode LL1_LIST (vector<Token>TokenStream, int &currentIndex)
 
     return listTypeNode;
 }
-
+*/
 
 int main()
 {
@@ -875,6 +927,7 @@ int main()
     env.runTimeStackPush();
     vector<Token> TokenStream;
     int currentIndex = 0;
+    initTypeHash();
     
 
     while (true)

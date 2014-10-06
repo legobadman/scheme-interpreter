@@ -37,6 +37,9 @@ public:
     Fraction operator - ( const Fraction& )const;
     Fraction operator - ( int )const;
 
+    int getNumer()const{return numer;}
+    int getDenom()const{return denom;}
+
     int numer;
     int denom;
 };

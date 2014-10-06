@@ -144,7 +144,7 @@ const string getpiece( string s, int startpos )
     return s.substr( startpos, i-startpos );
 }
 
-int MatchLength( const string piece, int (*p)(const char *) )
+int MatchLength (const string piece, int (*p)(const char *))
 {
     for( int i=piece.size(); i>0; i-- )
         if( (*p)( piece.substr(0,i).c_str() ) == 1 )
@@ -152,6 +152,7 @@ int MatchLength( const string piece, int (*p)(const char *) )
 
     return 0;
 }
+
 
 void commandLine()
 {

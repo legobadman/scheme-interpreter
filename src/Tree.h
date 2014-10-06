@@ -3,8 +3,11 @@
 
 #include <vector>
 #include <iostream>
+#include <sstream>
 #include "Number.h"
 #include "tokenType.h"
+#include "macro.h"
+
 
 using namespace std;
 
@@ -25,9 +28,9 @@ public:
     {
 
     }
-    ASTNode( const string &s ) : name(s) {}
+    ASTNode (const string &s) : name(s) {}
 
-    ASTNode( TokenType type, const string &s ) : nodeType(type), name(s)
+    ASTNode (TokenType type, const string &s) : nodeType(type), name(s)
     {
         if( type == NUM )
         {
@@ -35,8 +38,27 @@ public:
         }
     }
 
-    ASTNode( Number n ) : number(n), nodeType( NUM )
+    ASTNode (Number n) : number(n), nodeType( NUM )
     {
+        stringstream s;
+        Fraction ff;
+
+        switch(n.getType())
+        {
+        case INT:
+            s << n.getInteger(); 
+            break;
+        case FLOAT:
+            s << n.getFloat();
+            break;
+        case FRACTION:
+            ff = n.getFraction();
+            s << ff.getNumer() << "/" << ff.getDenom();
+            break;
+        default:
+            break;
+        }
+        name = s.str();
     }
 
     ~ASTNode()
@@ -91,6 +113,11 @@ public:
         nodeType = t;
     }
 
+    void setMacro (Macro m)
+    {
+        //macro = m;
+    }
+
     TokenType getTokenType()const
     {
         return nodeType;
@@ -105,6 +132,8 @@ private:
     TokenType nodeType;
 
     std::vector<p_AstNode> child;
+
+    Macro   macro; 
 
     /* the name of  procedure or real number */
     /* e.g.  "+" "square" "1" ... */

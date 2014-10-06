@@ -28,5 +28,4 @@ private:
     map<std::string,Macro> T1;
 };
 
-
 #endif

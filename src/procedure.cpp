@@ -163,10 +163,10 @@ p_AstNode interpreter( p_AstNode root )
         break;
     
     case PROC:
-        assigned = callProcedure( rootName, childList );
+        //assigned = callProcedure( rootName, childList );
         //printProcTree( result, "\t" );
 
-        result = interpreter( assigned );
+        //result = interpreter( assigned );
         break;
 
     case ARGUMENT:
@@ -214,8 +214,8 @@ p_AstNode interpreter( p_AstNode root )
 
     case IF:
         /* reguard any positive as true symbol */
-        temp = interpreter( root->getOneChild(0) );
-        if( temp->getNumber() > 0 )
+        temp = interpreter (root->getOneChild(0));
+        if (temp->getNumber() > 0)
             result = interpreter(root->getOneChild(1)); 
         else
             result = interpreter(root->getOneChild(2));
@@ -223,6 +223,7 @@ p_AstNode interpreter( p_AstNode root )
 
     case LAMBDA:
         result = root;
+ 
     break;
 
     }
@@ -386,10 +387,12 @@ p_AstNode Not( vector<p_AstNode> &ValueList )
 }
 
 
+/*
 vector<p_AstNode> getFormalArgument( const p_AstNode procNode )
 {
     return procNode->getOneChild(0)->getChild();
 }
+
 
 p_AstNode callProcedure( string procName, vector<p_AstNode> ValueList )
 {
@@ -408,12 +411,10 @@ p_AstNode callProcedure( string procName, vector<p_AstNode> ValueList )
         cerr << "The arguments didn't match" << endl;
     }
 
-    /* map the formal argument into the actual value */
     map< string, p_AstNode> formal_to_actual;
 
     for( int i=0; i<formalArgument.size(); i++ )
     {
-        /* get the (formal argument, actual argument) pair */
         string formalArgu = formalArgument[i]->getName();
         p_AstNode actualArgu = interpreter( ValueList[i] );
 
@@ -493,7 +494,7 @@ p_AstNode substitudeArgument( p_AstNode lambNode, vector<p_AstNode> valueList )
     
     return parsedTree;
 }
-
+*/
 
 
 

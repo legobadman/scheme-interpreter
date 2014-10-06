@@ -20,8 +20,9 @@ public:
     Number( int numer, int denom );
     Number( Fraction ff );
 
-    int getInteger()const{ return i; }
-    float getFloat()const{ return f; }
+    int     getInteger()const{ return i; }
+    float   getFloat()const{ return f; }
+    Fraction getFraction()const{ return ff;}
     DataType getType()const{ return type; }
 
     friend std::ostream &operator << ( std::ostream &out, Number num );

@@ -1,6 +1,12 @@
 #ifndef _TOKEN_TYPE_
 #define _TOKEN_TYPE_
 
+#include <map>
+#include <iostream>
+
+
+extern void initTypeHash();
+
 enum TokenType
 {
     unknown,
@@ -30,5 +36,7 @@ enum TokenType
 
 };
 
+
+extern std::map<std::string, TokenType> tokenTypeHash;
 
 #endif

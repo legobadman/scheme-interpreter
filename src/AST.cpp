@@ -7,6 +7,7 @@
 #include <vector>
 
 
+
 p_AstNode CalculateAST( p_AstNode ast_root )
 {
     //all the children of ast_root is a single value
@@ -134,12 +135,38 @@ p_AstNode   deepCopy( const p_AstNode pt_source )
 
 }
 
+void output_treenode (string offset, p_AstNode p)
+{
+    vector<p_AstNode> child;
+
+    child = p->getChild();
+
+    if (p->getTokenType() == NUM)
+    {
+        cout << offset << p->getNumber() << endl;
+    }
+    else
+    {
+        cout << offset << p->getName() << endl;
+    }
+
+    if (child.size()==0)
+    {
+        return;
+    }
+    for (int i=0; i<child.size(); i++)
+    {
+        output_treenode(offset+"\t", child[i]);
+    }
+}
+
 
 ostream &operator<< ( std::ostream &out, p_AstNode pt)
 {
-    vector<p_AstNode> arguList;
-    p_AstNode procNode;
+    //vector<p_AstNode> arguList;
+    //p_AstNode procNode;
 
+    /*
     switch(pt->nodeType)
     {
     case CONS: 
@@ -188,6 +215,9 @@ ostream &operator<< ( std::ostream &out, p_AstNode pt)
         out << pt->getNumber();
         break;
     }
+    */
+    output_treenode("", pt); 
+    
     return out;
 }
 
