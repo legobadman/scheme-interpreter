@@ -121,49 +121,39 @@ p_AstNode interpreter( p_AstNode root )
 
     case ARITH_OP:
         if( rootName == "+" )
-        {
-            result = add( childList );
-        }
+          result = add( childList );
+        
         else if( rootName == "-" )
-        {
-            result = sub( childList );
-        }
+          result = sub( childList );
+        
         else if( rootName == "*" )
-        {
-            result = multiply( childList );
-        }
+          result = multiply( childList );
+        
         else if( rootName == "/" )
-        {
-            result = divide( childList );
-        }
+          result = divide( childList );
 
         for(int i=0; i<root->getChild().size(); i++ )
             delete root->getOneChild( i );
+        
         root->getChild().clear();
 
         break;
 
     case BOOL_OP:
         if( rootName == "<" )
-        {
-            result = less_than( childList );
-        }
+          result = less_than( childList );
+        
         else if( rootName == "<=" )
-        {
-            result = less_or_equal_than( childList );
-        }
+          result = less_or_equal_than( childList );
+        
         else if( rootName == ">" )
-        {
-            result = greater_than( childList );
-        }
+          result = greater_than( childList );
+        
         else if( rootName == ">=" )
-        {
-            result = greater_or_equal_than( childList );
-        }
+          result = greater_or_equal_than( childList );
+        
         else if( rootName == "=" )
-        {
-            result = is_equal( childList );
-        }
+          result = is_equal( childList );
 
         break;
     
@@ -194,7 +184,7 @@ p_AstNode interpreter( p_AstNode root )
         if( consNode->getTokenType() != LIST &&
             consNode->getTokenType() != CONS )
         {
-            cerr << "car操作针对错误的类型。" << endl;
+            cerr << "cdr操作针对错误的类型。" << endl;
             exit(0);
         }
         else
@@ -221,9 +211,9 @@ p_AstNode interpreter( p_AstNode root )
         /* reguard any positive as true symbol */
         temp = interpreter (root->getOneChild(0));
         if (temp->getNumber() > 0)
-            result = interpreter(root->getOneChild(1)); 
+          result = interpreter(root->getOneChild(1)); 
         else
-            result = interpreter(root->getOneChild(2));
+          result = interpreter(root->getOneChild(2));
         break;
 
     case LAMBDA:
@@ -403,151 +393,6 @@ p_AstNode Not( vector<p_AstNode> &ValueList )
 }
 
 
-/*
-vector<p_AstNode> getFormalArgument( const p_AstNode procNode )
-{
-    return procNode->getOneChild(0)->getChild();
-}
-
-
-p_AstNode callProcedure( string procName, vector<p_AstNode> ValueList )
-{
-    LispEnvironment env = LispEnvironment::getRunTimeEnv();
-    p_AstNode root = env.getSymbol( procName );
-
-    if( !root )
-    {
-        cerr << "Undefined procedure: "<< procName << endl;
-        exit(0);
-    }
-
-    vector<p_AstNode> formalArgument = getFormalArgument( root );
-    if( ValueList.size() != formalArgument.size() )
-    {
-        cerr << "The arguments didn't match" << endl;
-    }
-
-    map< string, p_AstNode> formal_to_actual;
-
-    for( int i=0; i<formalArgument.size(); i++ )
-    {
-        string formalArgu = formalArgument[i]->getName();
-        p_AstNode actualArgu = interpreter( ValueList[i] );
-
-        formal_to_actual[ formalArgu ] = actualArgu;
-    }
-
-    p_AstNode assignedTree = assignArgument( 
-                                root->getOneChild(1), 
-                                formal_to_actual 
-                            );
-
-    return assignedTree;
-}
-
-
-p_AstNode assignArgument( 
-                            const p_AstNode root, 
-                            map<string, p_AstNode> formal_to_actual 
-                    )
-{
-    
-    vector<p_AstNode> childList = root->getChild();
-    LispEnvironment env = LispEnvironment::getRunTimeEnv();
-    TokenType type = root->getTokenType();
-    string name = root->getName();
-    
-    p_AstNode newNode;
-
-    if( type == ARGUMENT )
-    {
-        newNode = deepCopy (formal_to_actual[ root->getName() ]);
-    }
-    else if( type == NUM )
-    {
-        Number numobj = root->getNumber();
-        newNode = new ASTNode( numobj );
-    }
-    else if( type == ID )
-    {
-        p_AstNode   searchNode = env.getSymbol( name );
-        if( !searchNode )
-        {
-            cerr << "No such identifier: " << name << endl;
-            exit(0);
-        }
-        newNode = new ASTNode( searchNode->getNumber() );
-    }
-    else
-    {
-        newNode = new ASTNode( type, name ); 
-        for( int i=0; i<childList.size(); i++ )
-        {
-            p_AstNode newChild = assignArgument( childList[i], formal_to_actual );
-            newNode->addChild( newChild );
-        }
-    }
-
-    return newNode;
-}
-
-
-p_AstNode substitudeArgument( p_AstNode lambNode, vector<p_AstNode> valueList )
-{
-    p_AstNode formalArguNode;
-    p_AstNode funcBody;
-
-    formalArguNode = lambNode->getOneChild(0);
-    funcBody = lambNode->getOneChild(1);
-
-    map<string, p_AstNode> formal_to_actual;
-
-    vector<p_AstNode> child = formalArguNode->getChild();
-    for( int i=0; i<child.size(); i++ )
-        formal_to_actual[ child[i]->getName() ] = valueList[i];
-    
-    p_AstNode parsedTree = assignArgument( funcBody, formal_to_actual );
-    
-    return parsedTree;
-}
-*/
 
 
 
-/* 
-for example:
-    (define (f x y)
-        (define (abs x) ....)
-        (+ (abs x) (abs y)))
-    
-    to 
-
-    (define (f x y)
-        (define (abs x) .... )
-        (+ (if (> x 0) x (* -1 x)) (if (> y 0) y (* -1 y)))
-
-p_AstNode callTemperoryProcedure( p_AstNode root )
-{
-    TokenType   tokenType;
-    LispEnvironment env = LispEnvironment::getRunTimeEnv();
-
-    TokenType   nodeType = root->getTokenType();
-    string      name = root->getName();
-
-    vector<p_AstNode> child;
-
-    child = root->getChild();
-
-    if( nodeType!=ARGUMENT && env.isSymbolInCurrentStack( name ) )
-    {
-        root = callProcedure( name, child );
-    }
-    
-    for( int i=0; i<child.size(); i++ )
-    {
-        root->setOneChild( i, callTemperoryProcedure (child[i]) );
-    }
-    
-    return root;
-}
-*/
