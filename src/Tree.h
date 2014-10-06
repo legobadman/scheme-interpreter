@@ -115,7 +115,11 @@ public:
 
     void setMacro (Macro m)
     {
-        //macro = m;
+        macro = m;
+    }
+    Macro getMacro()
+    {
+        return macro;
     }
 
     TokenType getTokenType()const

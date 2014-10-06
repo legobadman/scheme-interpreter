@@ -171,7 +171,6 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
         }
         else if (str == "car")
         {
-            //TODO: (car (cons (+ 2 3) 3))
             expNode = LL1_CAR(TokenStream, currentIndex);
         }
         else if (str == "cdr")
@@ -193,6 +192,7 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
         vector<p_AstNode> valueList = LL1_exp_(TokenStream, currentIndex);
 
         // eval(code);
+        /*
         if (procNode->getTokenType() == LAMBDA)
         {
             p_AstNode realArgu = new ASTNode("");
@@ -202,11 +202,12 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
             //expNode = substitudeArgument (procNode, valueList);
             expNode = procNode;
         }
-        else
-        {
-            procNode -> setChild (valueList);
-            expNode = procNode;
-        }
+        */
+        //else
+        //{
+        procNode -> setChild (valueList);
+        expNode = procNode;
+        //}
 
         Macro   macro = env.SearchMacro(expNode->getName());
         //macro.outputtest();
@@ -505,6 +506,8 @@ p_AstNode LL1_LAMB(vector<Token>TokenStream, int &currentIndex)
     p_AstNode lambNode = new ASTNode;
     lambNode -> setTokenType (LAMBDA);
     lambNode -> setMacro (m);
+
+    match (")", TokenStream, currentIndex );
     //lambNode -> addChild (formalArgu);
     //lambNode -> addChild (bodyNode);
 
@@ -523,7 +526,7 @@ vector<p_AstNode> LL1_exp_(vector<Token>TokenStream, int &currentIndex)
     {
         p_AstNode newnode = LL1_exp(TokenStream, currentIndex);
         valueList = LL1_exp_(TokenStream, currentIndex);
-        valueList.insert( valueList.begin(), newnode );
+        valueList.insert (valueList.begin(), newnode);
     }
     else if ( token.getStrval()==")" )
         return valueList;

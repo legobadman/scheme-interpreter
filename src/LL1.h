@@ -5,6 +5,7 @@
 #include "Token.h"
 #include "macro.h"
 
+extern p_AstNode eval (vector<Token>, int);
 
 extern p_AstNode LL1_Lisp (vector<Token>, int &);
 

@@ -8,6 +8,8 @@
 using namespace std;
 
 
+void getTokenStream (vector<Token> &Q, string sourceCode );
+
 p_AstNode add( vector<p_AstNode> &ValueList )
 {
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
@@ -97,6 +99,9 @@ p_AstNode interpreter( p_AstNode root )
     p_AstNode   result, temp;
     p_AstNode   childNode, consNode, assigned;
     vector<p_AstNode> valueList;
+    Macro       m;
+    string      code, content;
+    vector<Token>   Q;
 
     switch( root->getTokenType() )
     {
@@ -222,7 +227,18 @@ p_AstNode interpreter( p_AstNode root )
         break;
 
     case LAMBDA:
-        result = root;
+        m       = root->getMacro();
+        content = m.get_content();
+        if (root->getChild().size() == 0)
+            result = root;
+        else
+        {
+            code = m.macro_span(root);
+            getTokenStream(Q, code);
+
+            result = eval(Q, 0);
+
+        }
  
     break;
 
