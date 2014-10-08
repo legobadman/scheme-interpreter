@@ -46,9 +46,9 @@ void Macro::put_arguments (vector<p_AstNode> arguments)
 }
 
 
-void Macro::put_preprocessing (string declare)
+void Macro::put_predefine (string inner_define)
 {
-    preprocessing.push_back(declare);
+    pre_Def_List.push_back (inner_define);
 }
 
 void Macro::set_content (string c)
@@ -61,6 +61,13 @@ string Macro::get_content ()
 {
     return content;
 }
+
+vector<string>  
+Macro::get_Pre_Def_List()
+{
+    return pre_Def_List;
+}
+
 
 void Macro::outputtest ()
 {

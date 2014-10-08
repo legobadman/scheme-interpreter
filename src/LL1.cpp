@@ -179,12 +179,23 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
             Macro   macro = env.SearchMacro(expNode->getName());
             if (!macro.isEmpty())
             {
-                string  code = macro.macro_span(procNode);
-
+                string code;
+                vector<string> predefList = macro.get_Pre_Def_List();
+                vector<string>::const_iterator it = predefList.begin();
                 vector<Token> Q;
+                
+                /* push stack */
+                for (; it != predefList.end(); it++)
+                {
+                    code = (*it);
+                    getTokenStream (Q, code);
+                    eval(Q, 0);
+                    Q.clear();
+                }
+                code = macro.macro_span(procNode);
                 getTokenStream (Q, code );
-
-                expNode = eval(Q,0);
+                expNode = eval(Q, 0);
+                /* pop */
             }
             else
             {
@@ -537,13 +548,13 @@ p_AstNode LL1_DEFOBJ(vector<Token>TokenStream, int &currentIndex)
     LispEnvironment env = LispEnvironment::getRunTimeEnv();
 
     /* define symbol */
-    if ( token.getTokenType() == ID )
+    if (token.getTokenType() == ID)
     {
         match( ID, TokenStream, currentIndex );
         defobj = new ASTNode( ID, token.getStrval() );
     }
     /* define procedure */
-    else if ( token.getStrval() == "(" )
+    else if (token.getStrval() == "(")
     {
         match( "(", TokenStream, currentIndex );
         
@@ -580,17 +591,13 @@ string LL1_DEFBODY (Macro &macro, vector<Token>TokenStream, int &currentIndex)
     if (ts == "(" )
     {
         Token next_token = TokenStream[ currentIndex + 1 ];
-        if ( next_token.getStrval() == "define" )
+        if (next_token.getStrval() == "define")
         {
             string def;
-            while (ts=="(" && next_token.getStrval()=="define")
-            {
-                def = contentInBracket (TokenStream, currentIndex);
-                macro.put_preprocessing (def);
-            }
-            token = TokenStream[currentIndex];
-            ts = token.getStrval ();
-            next_token = TokenStream[currentIndex+1];
+            def = contentInBracket (TokenStream, currentIndex);
+            match(")", TokenStream, currentIndex);
+            macro.put_predefine (def);
+            return LL1_DEFBODY (macro, TokenStream, currentIndex);
         }
         else
         {
@@ -616,8 +623,6 @@ string LL1_DEFBODY (Macro &macro, vector<Token>TokenStream, int &currentIndex)
         error("LL1_DEFBODY()");
 
 }
-
-
 
 p_AstNode LL1_COND(vector<Token>TokenStream, int &currentIndex)
 {
