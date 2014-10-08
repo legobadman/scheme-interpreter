@@ -59,7 +59,19 @@ void match (string s, vector<Token>TokenStream, int &currentIndex)
 string contentInBracket (vector<Token>TokenStream, int &currentIndex)
 {
     int leftBracket(0), rightBracket(0);
-    string content, token_str;
+    Token   currentToken;
+    string  content, token_str;
+
+    currentToken = TokenStream[currentIndex];
+    token_str = currentToken.getStrval();
+
+    if (token_str != "(")
+    {
+        currentIndex++;
+        return "";
+    }
+    
+
     content += "(";
     leftBracket++;
     currentIndex++;
@@ -152,77 +164,33 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
         token = TokenStream[currentIndex];
         str = token.getStrval();
 
-        /*
-        if ( str == "cond" )
-            expNode = LL1_COND(TokenStream, currentIndex);
-        else if ( str == "if" )
+        if (str == "if")
         {
             expNode = LL1_IF(TokenStream, currentIndex);
         }
-        else if (str == "let")
-        {
-            LL1_LET(TokenStream, currentIndex);
-        }
-        else if (str == "cons")
-        {
-            expNode = LL1_CONS(TokenStream, currentIndex);
-        }
-        else if (str == "car")
-        {
-            expNode = LL1_CAR(TokenStream, currentIndex);
-        }
-        else if (str == "cdr")
-        {
-            expNode = LL1_CDR(TokenStream, currentIndex); 
-        }
-        else if (str == "list")
-        {
-            expNode = LL1_LIST(TokenStream, currentIndex);
-        }
-        else if (str == "lambda")
-        {
-            expNode = LL1_LAMB(TokenStream, currentIndex);
-        }
         else
         {
-        */
-        p_AstNode procNode = LL1_procedure(TokenStream, currentIndex);
-        vector<p_AstNode> valueList = LL1_exp_(TokenStream, currentIndex);
+            p_AstNode procNode = LL1_procedure(TokenStream, currentIndex);
+            vector<p_AstNode> valueList = LL1_exp_(TokenStream, currentIndex);
 
-        // eval(code);
-        /*
-        if (procNode->getTokenType() == LAMBDA)
-        {
-            p_AstNode realArgu = new ASTNode("");
-            assert(realArgu);
-            realArgu -> setChild(valueList);
-            procNode -> addChild(realArgu);
-            //expNode = substitudeArgument (procNode, valueList);
+            procNode -> setChild (valueList);
             expNode = procNode;
-        }
-        */
-        //else
-        //{
-        procNode -> setChild (valueList);
-        expNode = procNode;
-        //}
 
-        Macro   macro = env.SearchMacro(expNode->getName());
-        //macro.outputtest();
-        if (!macro.isEmpty())
-        {
-            string  code = macro.macro_span(procNode);
+            Macro   macro = env.SearchMacro(expNode->getName());
+            if (!macro.isEmpty())
+            {
+                string  code = macro.macro_span(procNode);
 
-            vector<Token> Q;
-            getTokenStream (Q, code );
+                vector<Token> Q;
+                getTokenStream (Q, code );
 
-            expNode = eval(Q,0);
+                expNode = eval(Q,0);
+            }
+            else
+            {
+                expNode = interpreter(procNode);
+            }
         }
-        else
-        {
-            expNode = interpreter(procNode);
-        }
-        //}
         match(")", TokenStream, currentIndex);
     }
     else if (token.getStrval()=="\"" || 
@@ -260,7 +228,6 @@ p_AstNode LL1_Value(vector<Token>TokenStream, int &currentIndex)
         
         if (!macro.isEmpty() && !macro.is_Procedure_Macro())
         {
-                //macro.outputtest();
             string  code = macro.macro_span();
 
             vector<Token> Q;
@@ -274,23 +241,6 @@ p_AstNode LL1_Value(vector<Token>TokenStream, int &currentIndex)
             return returnNode;
         }
 
-        /*
-        p_AstNode searchNode = env.getSymbol( token_string );
-        if (searchNode -> getTokenType() == NUM)
-        {
-            returnNode = new ASTNode(ID, token_string);
-        }
-        else
-        {
-            returnNode = deepCopy (searchNode);
-        }
-        returnNode = deepCopy( searchNode );    
-        if( !returnNode )
-        {
-            cerr << token.getStrval() << " doesn't exist" << endl;
-            exit(0);
-        }
-        */
     }
 
     else if (token_type == NUM)
@@ -326,6 +276,10 @@ p_AstNode LL1_procedure(vector<Token>TokenStream, int &currentIndex)
     {
         procNode = LL1_LAMB(TokenStream, currentIndex);
     }
+    else if (str == "if")
+    {
+        
+    }
     else
     {
         match(str, TokenStream, currentIndex);
@@ -340,6 +294,46 @@ p_AstNode LL1_procedure(vector<Token>TokenStream, int &currentIndex)
     }
 
     return procNode;
+}
+
+
+p_AstNode   LL1_IF(vector<Token>TokenStream, int &currentIndex)
+{
+    p_AstNode root, judgeNode, result;
+    Token   token;
+
+    match ("if", TokenStream, currentIndex);
+    root = new ASTNode(IF, "if");
+    judgeNode = LL1_exp(TokenStream, currentIndex);
+
+    if (judgeNode->getNumber() > 0)
+    {
+        root->appendChild(new ASTNode(1));
+
+        p_AstNode thenNode = LL1_exp(TokenStream, currentIndex);
+        root->appendChild(thenNode);
+
+        /* just scan the else part */
+        Token token = TokenStream[currentIndex];
+        contentInBracket(TokenStream, currentIndex);
+ 
+        root->appendChild(new ASTNode());
+    }
+    else
+    {
+        // falseNode
+        root->appendChild(new ASTNode(Number(0)));
+        root->appendChild(new ASTNode());
+        contentInBracket(TokenStream, currentIndex);
+        p_AstNode elseNode = LL1_exp(TokenStream, currentIndex);
+        root->appendChild(elseNode);
+
+    }
+    //match(")", TokenStream, currentIndex);
+    /* free judgeNode */
+
+    return root;
+
 }
 
 
@@ -704,9 +698,7 @@ int main()
         
         p_AstNode p = eval (TokenStream, currentIndex);
         if (p)
-        {
-            cout << p;
-        }
+          cout << p;
 
         TokenStream.clear();
         currentIndex = 0;

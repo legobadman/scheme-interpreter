@@ -107,6 +107,12 @@ public:
         if (i < child.size())
             child[i] = newNode;
     }
+    
+    void appendChild(p_AstNode newNode)
+    {
+        child.push_back(newNode);
+    }
+
 
     void setTokenType( TokenType t )
     {
@@ -117,6 +123,7 @@ public:
     {
         macro = m;
     }
+
     Macro getMacro()
     {
         return macro;

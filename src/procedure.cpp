@@ -157,13 +157,6 @@ p_AstNode interpreter( p_AstNode root )
 
         break;
     
-    case PROC:
-        //assigned = callProcedure( rootName, childList );
-        //printProcTree( result, "\t" );
-
-        //result = interpreter( assigned );
-        break;
-
     case ARGUMENT:
         result = root;
         break;

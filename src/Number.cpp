@@ -1,7 +1,7 @@
 #include "Number.h"
 #include <cstdlib>
 
-Number::Number( std::string str )
+Number::Number (std::string str)
 {
     int i;
     int numer_pos, denom_pos;
@@ -41,13 +41,13 @@ Number::Number( std::string str )
     }
 }
 
-Number::Number( int ii ) : i(ii), type(INT)
+Number::Number (int ii) : i(ii), type(INT)
 {
 }
 
-Number::Number( float ff ) : f(ff), type(FLOAT) {}
+Number::Number (float ff) : f(ff), type(FLOAT) {}
 
-Number::Number( int numer, int denom)
+Number::Number (int numer, int denom)
 {
     if( numer % denom==0 )
     {
@@ -61,7 +61,7 @@ Number::Number( int numer, int denom)
     }
 }
 
-Number::Number( Fraction f )
+Number::Number (Fraction f)
 {
     if( f.numer % f.denom == 0 )
     {
