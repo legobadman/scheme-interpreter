@@ -84,6 +84,41 @@ string getSourceCodeFromStream( istream &in )
     return sourceCode; 
 }
 
+string getSourceCodeFromStream2 (istream &in)
+{
+    char c;
+    /* the num of brack in the program */
+    int     leftBracket, rightBracket;
+    /* some code appear in the command line mode */
+    string  sourceCode;
+
+    leftBracket = rightBracket = 0;
+    
+    while (c = in.get())
+    {
+        if (c!='\n' && c!=' ' && c!='\t')
+            break;
+
+    }
+    in.putback(c);
+    //cout << ">>> ";
+
+    while( c = in.get() )
+    {
+        leftBracket += (c=='(')? 1 : 0;
+        rightBracket += (c==')')? 1 : 0;
+        sourceCode += c;
+
+        if (leftBracket == rightBracket) break;
+    }
+    in.sync();
+
+    in.get();
+    //cin.get();
+    
+    return sourceCode; 
+}
+
 void getTokenStream( vector<Token> &Q, string sourceCode )
 {
     set_functions_for_allfunctions();

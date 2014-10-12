@@ -2,6 +2,7 @@
 #include "tokenType.h"
 #include "Tree.h"
 #include <vector>
+#include <fstream>
 #include <iostream>
 #include <cstdlib>
 #include <map>
@@ -10,11 +11,19 @@
 #include "LispEnvironment.h"
 #include <stdlib.h>
 #include "procedure.h"
+#include "code_gen.h"
+#include <stack>
 
 using namespace std;
 
 
+stack<string> idStack;
+stack<string> procStack;
+
+string bytecode_id = "a";
+
 string getSourceCodeFromStream( istream &in );
+string getSourceCodeFromStream2( istream &in );
 void getTokenStream (vector<Token> &Q, string sourceCode );
 void constructTokenStream (vector<Token> &Q, list<string> codelist);
 void outputtest( vector<Token> &Q );
@@ -170,7 +179,10 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
         }
         else
         {
+            
             p_AstNode procNode = LL1_procedure(TokenStream, currentIndex);
+//            cout << "mov "<<bytecode_id<<", " << valueList[0]->getByteCodeID() << endl;
+            
             vector<p_AstNode> valueList = LL1_exp_(TokenStream, currentIndex);
 
             procNode -> setChild (valueList);
@@ -215,6 +227,51 @@ p_AstNode LL1_exp (vector<Token>TokenStream, int &currentIndex)
     }
     return expNode;
 }
+
+vector<p_AstNode> LL1_exp_(vector<Token>TokenStream, int &currentIndex)
+{
+    Token token = TokenStream[currentIndex];
+    p_AstNode   newnode;
+
+    vector<p_AstNode> valueList;
+
+    string str = token.getStrval();
+    string id, previous_id;
+    string op_in;
+    TokenType   tt = token.getTokenType();
+
+    if (str=="(" || str=="\"" || tt==ID || tt==NUM)
+    {
+        op_in = procStack.top();
+        if (str == "(")
+        {
+            bytecode_id = next_id(bytecode_id);
+            idStack.push(bytecode_id);
+            newnode = LL1_exp(TokenStream, currentIndex);
+            previous_id = idStack.top();
+            idStack.pop();
+            id = idStack.top();
+            cout << op_in << " " << id <<", " << previous_id << endl; 
+        }
+        else
+        {
+            id = idStack.top();
+            newnode = LL1_exp(TokenStream, currentIndex);
+            cout << op_in << " " << id <<", " << newnode->getByteCodeID() << endl; 
+
+        }
+        
+        valueList = LL1_exp_(TokenStream, currentIndex);
+        valueList.insert (valueList.begin(), newnode);
+    }
+    else if ( token.getStrval()==")" )
+        return valueList;
+    else
+        error("LL1_exp()");
+
+    return valueList;
+}
+
 
 p_AstNode LL1_Value(vector<Token>TokenStream, int &currentIndex)
 {
@@ -302,6 +359,30 @@ p_AstNode LL1_procedure(vector<Token>TokenStream, int &currentIndex)
             procNode = new ASTNode (PROC, str);
         else
             procNode = new ASTNode (it->second, str);
+
+        switch (it->second)
+        {
+        case ARITH_OP:
+            if (str == "+")
+            {
+                cout << "mov "<<bytecode_id<<", " << 0 << endl;
+                procStack.push("add");             
+            }else if (str == "-")
+            {
+                cout << "mov "<<bytecode_id<<", " << 0 << endl;
+                procStack.push("sub");
+            }else if (str == "*")
+            {
+                cout << "mov "<<bytecode_id<<", " << 1 << endl;
+                procStack.push("mul");
+            }else if (str == "/")
+            {
+                cout << "mov "<<bytecode_id<<", " << 1 << endl;
+                procStack.push("div");
+            }
+            break;
+        }
+
     }
 
     return procNode;
@@ -407,26 +488,6 @@ p_AstNode LL1_LAMB(vector<Token>TokenStream, int &currentIndex)
     return lambNode;
 }
 
-vector<p_AstNode> LL1_exp_(vector<Token>TokenStream, int &currentIndex)
-{
-    Token token = TokenStream[currentIndex];
-
-    vector<p_AstNode> valueList;
-
-    if ( token.getStrval()=="(" || token.getStrval()=="\"" || 
-            token.getTokenType()==ID || token.getTokenType()==NUM )
-    {
-        p_AstNode newnode = LL1_exp(TokenStream, currentIndex);
-        valueList = LL1_exp_(TokenStream, currentIndex);
-        valueList.insert (valueList.begin(), newnode);
-    }
-    else if ( token.getStrval()==")" )
-        return valueList;
-    else
-        error("LL1_exp()");
-
-    return valueList;
-}
 
 /* the function try to match (<p1> <e1>) (<p2> <e2>) ... */
 p_AstNode LL1_ConditionList(vector<Token>TokenStream, int &currentIndex)
@@ -692,8 +753,9 @@ int main()
     int currentIndex = 0;
     initTypeHash();
     
+    idStack.push(bytecode_id);
 
-    while (true)
+    while (!false)
     {
         env.TurnOnCalculation();
 
@@ -703,10 +765,26 @@ int main()
         
         p_AstNode p = eval (TokenStream, currentIndex);
         if (p)
-          cout << p;
+        {
+            cout << p;
+        }
 
         TokenStream.clear();
         currentIndex = 0;
+    }
+    ifstream in("wtf.scm");
+
+    while (!in.eof())
+    {
+        string sourceCode = getSourceCodeFromStream2(in);
+        getTokenStream (TokenStream, sourceCode);
+        p_AstNode p = eval (TokenStream, currentIndex);
+        if (p)
+            cout << p << endl;
+
+        TokenStream.clear();
+        currentIndex = 0;
+
     }
 
     env.runTimeStackPop();

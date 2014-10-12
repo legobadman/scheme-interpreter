@@ -62,7 +62,7 @@ string Macro::get_content ()
     return content;
 }
 
-vector<string>  
+vector<string> 
 Macro::get_Pre_Def_List()
 {
     return pre_Def_List;

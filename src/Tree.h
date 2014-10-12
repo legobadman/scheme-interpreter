@@ -28,6 +28,7 @@ public:
     {
 
     }
+
     ASTNode (const string &s) : name(s) {}
 
     ASTNode (TokenType type, const string &s) : nodeType(type), name(s)
@@ -36,6 +37,7 @@ public:
         {
             number = Number(s);        
         }
+        bytecode_id = name;
     }
 
     ASTNode (Number n) : number(n), nodeType( NUM )
@@ -59,6 +61,7 @@ public:
             break;
         }
         name = s.str();
+        bytecode_id = name;
     }
 
     ~ASTNode()
@@ -70,6 +73,10 @@ public:
     void addChild( p_AstNode p )
     {
         child.push_back( p );
+    }
+
+    string getByteCodeID(){
+        return bytecode_id;
     }
 
     string getName()
@@ -145,6 +152,8 @@ private:
     std::vector<p_AstNode> child;
 
     Macro   macro; 
+
+    string  bytecode_id;
 
     /* the name of  procedure or real number */
     /* e.g.  "+" "square" "1" ... */

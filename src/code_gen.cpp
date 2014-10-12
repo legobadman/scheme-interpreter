@@ -1,6 +1,5 @@
-#include <iostream>
-#include <string>
 #include <sstream>
+#include "code_gen.h"
 
 using namespace std;
 
@@ -35,6 +34,7 @@ string next_id (string curr_id)
     }
 }
 
+/*
 int main2()
 {
     string in;
@@ -45,3 +45,4 @@ int main2()
     }
     return 0;
 }
+*/

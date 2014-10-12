@@ -1,3 +1,15 @@
-#include "code_gen.h"
+#ifndef CODE_GEN_H_
+#define CODE_GEN_H_
 
-extern string next_id (string curr_id);
+#include <iostream>
+#include <string>
+
+extern std::string next_id (std::string curr_id);
+
+
+
+
+
+
+
+#endif
